@@ -129,8 +129,10 @@ pub enum RunError {
     EmptyReference(String),
     #[error("{} no protein atoms autodetected", "error:".red().bold())]
     AutodetectionFailed,
-    #[error("{} simulation box is not orthogonal. This is not supported, sorry.", "error:".red().bold())]
+    #[error("{} simulation box is not orthogonal; this is not supported, sorry", "error:".red().bold())]
     BoxNotOrthogonal,
+    #[error("{} simulation box is not a valid simulation box; some required dimensions are not positive", "error:".red().bold())]
+    BoxNotValid,
 }
 
 /// Check that the input and output files are not identical.
@@ -186,7 +188,6 @@ fn center_xtc_file(
     dimension: Dimension,
     silent: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-
     // open the output xtc file
     let mut writer = XtcWriter::new(&system, output_xtc)?;
 
@@ -279,7 +280,8 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     if !args.silent {
-        println!("{}", "\n   >> gcenter v0.1.0 <<\n".bold());
+        let version = format!("\n >> gcenter {} <<\n", env!("CARGO_PKG_VERSION"));
+        println!("{}", version.bold());
     }
 
     // check that the input file is not the same as the output file
@@ -293,6 +295,11 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     // read structure file
     let mut system = System::from_file(&args.structure)?;
+
+    // check that box has positive dimensions
+    if !system.get_box_as_ref().is_valid() {
+        return Err(Box::from(RunError::BoxNotValid));
+    }
 
     // check that the simulation box is orthogonal
     if !system.get_box_as_ref().is_orthogonal() {

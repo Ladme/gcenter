@@ -7,7 +7,7 @@
 //!
 //! ## Basic usage
 //! ```
-//! ./gcenter -c system.gro -f trajectory.xtc -o output_trajectory.xtc
+//! gcenter -c system.gro -f trajectory.xtc -o output_trajectory.xtc
 //! ```
 //!
 //! Use `./gcenter --help` for more information about using this program.
@@ -20,4 +20,6 @@ fn main() {
         eprintln!("{}", e);
         process::exit(1);
     }
+
+    process::exit(0);
 }
