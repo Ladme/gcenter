@@ -4,6 +4,8 @@
 #[cfg(test)]
 mod pass_tests {
     use assert_cmd::Command;
+    use std::fs::{self, File};
+    use std::io::prelude::*;
     use tempfile::Builder;
 
     #[test]
@@ -479,6 +481,67 @@ mod pass_tests {
             output.path().to_str().unwrap()
         ));
     }
+
+    #[test]
+    fn backup() {
+        let mut file = File::create("tests/test_files/temporary.gro").unwrap();
+        file.write_all(b"Some content to test.").unwrap();
+
+        let output = "tests/test_files/temporary.gro";
+        let output_arg = format!("-o{}", output);
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg])
+            .assert()
+            .success();
+
+        // check that the file has been successfully written
+        assert!(file_diff::diff("tests/test_files/output_xyz.gro", output));
+
+        // check that the backup has been created
+        let backups: Vec<Result<std::path::PathBuf, glob::GlobError>> =
+            glob::glob("tests/test_files/#temporary.gro*")
+                .unwrap()
+                .collect();
+        assert_eq!(backups.len(), 1);
+
+        let mut content = String::new();
+        let mut read = File::open(&backups[0].as_ref().unwrap()).unwrap();
+        read.read_to_string(&mut content).unwrap();
+
+        assert_eq!(content, "Some content to test.");
+
+        fs::remove_file(&backups[0].as_ref().unwrap()).unwrap();
+        fs::remove_file("tests/test_files/temporary.gro").unwrap();
+    }
+
+    #[test]
+    fn overwrite() {
+        let mut file = File::create("tests/test_files/temporary_overwrite.gro").unwrap();
+        file.write_all(b"Some content to test.").unwrap();
+
+        let output = "tests/test_files/temporary_overwrite.gro";
+        let output_arg = format!("-o{}", output);
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg, "--overwrite"])
+            .assert()
+            .success();
+
+        // check that the file has been successfully written
+        assert!(file_diff::diff("tests/test_files/output_xyz.gro", output));
+
+        // check that the backup has NOT been created
+        let backups: Vec<Result<std::path::PathBuf, glob::GlobError>> =
+            glob::glob("tests/test_files/#temporary_overwrite.gro*")
+                .unwrap()
+                .collect();
+        assert_eq!(backups.len(), 0);
+
+        fs::remove_file("tests/test_files/temporary_overwrite.gro").unwrap();
+    }
 }
 
 #[cfg(test)]
@@ -623,6 +686,18 @@ mod fail_tests {
                 "-ctests/test_files/input_tiny_nonorthogonal.gro",
                 &output_arg,
             ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn invalid_box() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input_tiny_invalid.gro", &output_arg])
             .assert()
             .failure();
     }

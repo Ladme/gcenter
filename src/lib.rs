@@ -13,9 +13,6 @@ use groan_rs::{Dimension, System, XtcWriter};
 /// Frequency of printing during analysis of an xtc file.
 const PRINT_FREQ: u64 = 500000;
 
-/// Current version of the `gcenter` program.
-const GCENTER_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 // Center Gromacs trajectory or structure file.
 #[derive(Parser, Debug)]
 #[command(
@@ -134,8 +131,10 @@ pub enum RunError {
     EmptyReference(String),
     #[error("{} no protein atoms autodetected", "error:".red().bold())]
     AutodetectionFailed,
-    #[error("{} simulation box is not orthogonal. This is not supported, sorry.", "error:".red().bold())]
+    #[error("{} simulation box is not orthogonal; this is not supported, sorry", "error:".red().bold())]
     BoxNotOrthogonal,
+    #[error("{} simulation box is not a valid simulation box; some required dimensions are not positive", "error:".red().bold())]
+    BoxNotValid,
     #[error("{} output file '{}' has unsupported file extension", "error:".red().bold(), .0.yellow())]
     UnsupportedFileExtension(String),
 }
@@ -297,8 +296,8 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     if !args.silent {
-        let header = format!("\n   >> gcenter v{} <<\n", GCENTER_VERSION);
-        println!("{}", header.bold());
+        let version = format!("\n >> gcenter {} <<\n", env!("CARGO_PKG_VERSION"));
+        println!("{}", version.bold());
     }
 
     // check that the input file is not the same as the output file
@@ -312,6 +311,11 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     // read structure file
     let mut system = System::from_file(&args.structure)?;
+
+    // check that box has positive dimensions
+    if !system.get_box_as_ref().is_valid() {
+        return Err(Box::from(RunError::BoxNotValid));
+    }
 
     // determine whether velocities should be printed depending on the structure file
     let velocities = match FileType::from_name(&args.structure) {
