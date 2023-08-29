@@ -7,9 +7,14 @@ use std::io::{self, Write};
 use std::path::Path;
 use thiserror::Error;
 
+use groan_rs::files::FileType;
 use groan_rs::{Dimension, System, XtcWriter};
 
+/// Frequency of printing during analysis of an xtc file.
 const PRINT_FREQ: u64 = 500000;
+
+/// Current version of the `gcenter` program.
+const GCENTER_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // Center Gromacs trajectory or structure file.
 #[derive(Parser, Debug)]
@@ -25,7 +30,7 @@ pub struct Args {
         short = 'c',
         long = "structure",
         help = "Structure file to read",
-        long_help = "Gro file containing the system structure. If trajectory is also supplied, coordinates from the structure file are ignored."
+        long_help = "Gro or pdb file containing the system structure. If trajectory is also supplied, coordinates from the structure file are ignored."
     )]
     structure: String,
 
@@ -49,7 +54,7 @@ pub struct Args {
         short = 'o',
         long = "output",
         help = "Name of the output file",
-        long_help = "Output gro (if no trajectory file is provided) or xtc file."
+        long_help = "Output gro, pdb (if no trajectory file is provided), or xtc file."
     )]
     output: String,
 
@@ -131,6 +136,8 @@ pub enum RunError {
     AutodetectionFailed,
     #[error("{} simulation box is not orthogonal. This is not supported, sorry.", "error:".red().bold())]
     BoxNotOrthogonal,
+    #[error("{} output file '{}' has unsupported file extension", "error:".red().bold(), .0.yellow())]
+    UnsupportedFileExtension(String),
 }
 
 /// Check that the input and output files are not identical.
@@ -154,10 +161,22 @@ fn center_gro_file(
     system: &mut System,
     reference: &str,
     output: &str,
+    output_type: FileType,
     dimension: Dimension,
+    velocities: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     system.atoms_center(reference, dimension)?;
-    system.write_gro(output, true)?;
+
+    match output_type {
+        FileType::GRO => system.write_gro(output, velocities)?,
+        FileType::PDB => system.write_pdb(output)?,
+        _ => {
+            return Err(Box::new(RunError::UnsupportedFileExtension(
+                output.to_string(),
+            )))
+        }
+    }
+
     Ok(())
 }
 
@@ -186,7 +205,6 @@ fn center_xtc_file(
     dimension: Dimension,
     silent: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-
     // open the output xtc file
     let mut writer = XtcWriter::new(&system, output_xtc)?;
 
@@ -279,7 +297,8 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     if !args.silent {
-        println!("{}", "\n   >> gcenter v0.1.0 <<\n".bold());
+        let header = format!("\n   >> gcenter v{} <<\n", GCENTER_VERSION);
+        println!("{}", header.bold());
     }
 
     // check that the input file is not the same as the output file
@@ -293,6 +312,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     // read structure file
     let mut system = System::from_file(&args.structure)?;
+
+    // determine whether velocities should be printed depending on the structure file
+    let velocities = match FileType::from_name(&args.structure) {
+        FileType::GRO => true,
+        FileType::PDB => false,
+        _ => panic!("gcenter: Fatal Error. Invalid type of structure file but no error raised from the groan_rs library."),
+    };
 
     // check that the simulation box is orthogonal
     if !system.get_box_as_ref().is_orthogonal() {
@@ -363,19 +389,36 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    // determine type of the output file
+    let output_type = FileType::from_name(&args.output);
+
     match args.trajectory {
         // xtc file not provided, use gro file
-        None => center_gro_file(&mut system, "Reference", &args.output, dim)?,
-        // use xtc file
-        Some(ref file) => center_xtc_file(
+        None => center_gro_file(
             &mut system,
-            file,
             "Reference",
             &args.output,
-            args.step,
+            output_type,
             dim,
-            args.silent,
+            velocities,
         )?,
+
+        // use xtc file
+        Some(ref file) => {
+            if output_type != FileType::XTC {
+                return Err(Box::new(RunError::UnsupportedFileExtension(args.output)));
+            }
+
+            center_xtc_file(
+                &mut system,
+                file,
+                "Reference",
+                &args.output,
+                args.step,
+                dim,
+                args.silent,
+            )?;
+        }
     }
 
     if !args.silent {

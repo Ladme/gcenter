@@ -4,11 +4,11 @@
 #[cfg(test)]
 mod pass_tests {
     use assert_cmd::Command;
-    use tempfile::NamedTempFile;
+    use tempfile::Builder;
 
     #[test]
     fn xyz_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -24,8 +24,59 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_gro_to_pdb() {
+        let output = Builder::new().suffix(".pdb").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.pdb",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_pdb_to_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.pdb", &output_arg])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_pdb.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_pdb_to_pdb() {
+        let output = Builder::new().suffix(".pdb").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.pdb", &output_arg])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.pdb",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_gro_explicit() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -42,7 +93,7 @@ mod pass_tests {
 
     #[test]
     fn xyz_gro_explicit_protein() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -65,7 +116,7 @@ mod pass_tests {
 
     #[test]
     fn xy_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -82,7 +133,7 @@ mod pass_tests {
 
     #[test]
     fn xz_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -99,7 +150,7 @@ mod pass_tests {
 
     #[test]
     fn yz_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -116,7 +167,7 @@ mod pass_tests {
 
     #[test]
     fn x_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -133,7 +184,7 @@ mod pass_tests {
 
     #[test]
     fn y_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -150,7 +201,7 @@ mod pass_tests {
 
     #[test]
     fn z_gro() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -167,7 +218,7 @@ mod pass_tests {
 
     #[test]
     fn xyz_gro_water() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -189,7 +240,7 @@ mod pass_tests {
 
     #[test]
     fn xyz_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -210,7 +261,7 @@ mod pass_tests {
 
     #[test]
     fn xyz_xtc_explicit() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -232,7 +283,7 @@ mod pass_tests {
 
     #[test]
     fn xy_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -254,7 +305,7 @@ mod pass_tests {
 
     #[test]
     fn xz_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -276,7 +327,7 @@ mod pass_tests {
 
     #[test]
     fn yz_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -298,7 +349,7 @@ mod pass_tests {
 
     #[test]
     fn x_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -320,7 +371,7 @@ mod pass_tests {
 
     #[test]
     fn y_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -342,7 +393,7 @@ mod pass_tests {
 
     #[test]
     fn z_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -364,7 +415,7 @@ mod pass_tests {
 
     #[test]
     fn xyz_xtc_water() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -387,7 +438,7 @@ mod pass_tests {
 
     #[test]
     fn complicated_group() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -409,7 +460,7 @@ mod pass_tests {
 
     #[test]
     fn xyz_xtc_step() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -433,7 +484,7 @@ mod pass_tests {
 #[cfg(test)]
 mod fail_tests {
     use assert_cmd::Command;
-    use tempfile::NamedTempFile;
+    use tempfile::Builder;
 
     #[test]
     fn file_protection_gro() {
@@ -478,7 +529,7 @@ mod fail_tests {
 
     #[test]
     fn empty_group() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -496,7 +547,7 @@ mod fail_tests {
 
     #[test]
     fn gro_file_not_found() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -513,7 +564,7 @@ mod fail_tests {
 
     #[test]
     fn xtc_file_not_found() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -530,7 +581,7 @@ mod fail_tests {
 
     #[test]
     fn ndx_file_not_found() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -547,7 +598,7 @@ mod fail_tests {
 
     #[test]
     fn inconsistent_gro_xtc() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -563,7 +614,7 @@ mod fail_tests {
 
     #[test]
     fn nonorthogonal_box() {
-        let output = NamedTempFile::new().unwrap();
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -571,6 +622,46 @@ mod fail_tests {
             .args([
                 "-ctests/test_files/input_tiny_nonorthogonal.gro",
                 &output_arg,
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn no_extension() {
+        let output = Builder::new().tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn unsupported_extension_gro() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn unsupported_extension_xtc() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
             ])
             .assert()
             .failure();
