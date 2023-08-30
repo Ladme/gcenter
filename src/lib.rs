@@ -162,12 +162,11 @@ fn center_gro_file(
     output: &str,
     output_type: FileType,
     dimension: Dimension,
-    velocities: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     system.atoms_center(reference, dimension)?;
 
     match output_type {
-        FileType::GRO => system.write_gro(output, velocities)?,
+        FileType::GRO => system.write_gro(output, system.has_velocities())?,
         FileType::PDB => system.write_pdb(output)?,
         _ => {
             return Err(Box::new(RunError::UnsupportedFileExtension(
@@ -317,13 +316,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Err(Box::from(RunError::BoxNotValid));
     }
 
-    // determine whether velocities should be printed depending on the structure file
-    let velocities = match FileType::from_name(&args.structure) {
-        FileType::GRO => true,
-        FileType::PDB => false,
-        _ => panic!("gcenter: Fatal Error. Invalid type of structure file but no error raised from the groan_rs library."),
-    };
-
     // check that the simulation box is orthogonal
     if !system.get_box_as_ref().is_orthogonal() {
         return Err(Box::from(RunError::BoxNotOrthogonal));
@@ -404,7 +396,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             &args.output,
             output_type,
             dim,
-            velocities,
         )?,
 
         // use xtc file

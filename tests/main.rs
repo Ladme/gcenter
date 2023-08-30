@@ -77,6 +77,23 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_gro_no_velocities() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input_no_velocities.gro", &output_arg])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_pdb.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_gro_explicit() {
         let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
