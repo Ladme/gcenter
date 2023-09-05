@@ -2,7 +2,7 @@
 // Copyright (c) 2023 Ladislav Bartos
 
 //! Rust program for centering any group of atoms into the center of a simulation box.
-//! Works with gromacs gro structure files, pdb structure files, and gromacs xtc trajectories.
+//! Works with gromacs gro structure files, pdb structure files, and gromacs xtc and trr trajectories.
 //! Only supports orthogonal boxes!
 //!
 //! ## Basic usage
