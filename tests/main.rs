@@ -301,6 +301,69 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_xtc_to_trr() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_xtc.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_to_trr() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_trr.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_to_xtc() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xy_xtc() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());

@@ -8,7 +8,7 @@ use std::path::Path;
 use thiserror::Error;
 
 use groan_rs::files::FileType;
-use groan_rs::{Dimension, System, XtcWriter};
+use groan_rs::prelude::*;
 
 /// Frequency of printing during analysis of an xtc file.
 const PRINT_FREQ: u64 = 500000;
@@ -35,7 +35,7 @@ pub struct Args {
         short = 'f',
         long = "trajectory",
         help = "Trajectory file to read",
-        long_help = "Xtc file containing the compressed trajectory which should be manipulated. If not provided, the structure file itself will be centered."
+        long_help = "Xtc or trr file containing the trajectory which should be manipulated. If not provided, the structure file itself will be centered."
     )]
     trajectory: Option<String>,
 
@@ -155,8 +155,8 @@ fn sanity_check_files(args: &Args) -> Result<(), RunError> {
     Ok(())
 }
 
-/// Center the reference group and write an output gro file.
-fn center_gro_file(
+/// Center the reference group and write an output gro or pdb file.
+fn center_structure_file(
     system: &mut System,
     reference: &str,
     output: &str,
@@ -193,25 +193,29 @@ fn print_progress(
     io::stdout().flush().unwrap();
 }
 
-/// Center the reference group for every frame of the xtc file and write output xtc file.
-fn center_xtc_file(
-    system: &mut System,
-    input_xtc: &str,
+/// Center the reference group for every frame of the xdr file and write output xdr file.
+fn center_xdr_file<'a, Reader, Writer>(
+    system: &'a mut System,
     reference: &str,
-    output_xtc: &str,
+    trajectory: impl AsRef<Path>,
+    output: impl AsRef<Path>,
     step: usize,
     dimension: Dimension,
     silent: bool,
-) -> Result<(), Box<dyn std::error::Error>> {
-    // open the output xtc file
-    let mut writer = XtcWriter::new(&system, output_xtc)?;
+) -> Result<(), Box<dyn std::error::Error>>
+where
+    Writer: XdrWriter,
+    Reader: XdrReader<'a>,
+{
+    let mut writer = Writer::new(system, output)?;
+    let iterator = Reader::new(system, trajectory)?;
 
     let colored_step = "Step:".cyan();
     let colored_time = "Time:".bright_purple();
     let colored_running = "CENTERING".yellow();
 
-    // iterate through the input xtc file
-    for (curr_step, raw_frame) in system.xtc_iter(input_xtc)?.enumerate() {
+    // iterate through the input trajectory file
+    for (curr_step, raw_frame) in iterator.enumerate() {
         let frame = raw_frame?;
 
         if !silent && frame.get_simulation_step() % PRINT_FREQ == 0 {
@@ -226,20 +230,12 @@ fn center_xtc_file(
 
         if curr_step % step == 0 {
             frame.atoms_center(reference, dimension)?;
-            writer.write_frame(None)?;
+            writer.write_frame()?;
         }
     }
 
     if !silent {
-        print_progress(
-            system.get_simulation_step(),
-            system.get_simulation_time() as u64,
-            &colored_step,
-            &colored_time,
-            &"COMPLETED".green(),
-        );
-
-        println!("\n");
+        println!("[{: ^9}]\n", &"COMPLETED".green());
     }
 
     Ok(())
@@ -389,30 +385,57 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let output_type = FileType::from_name(&args.output);
 
     match args.trajectory {
-        // xtc file not provided, use gro file
-        None => center_gro_file(
-            &mut system,
-            "Reference",
-            &args.output,
-            output_type,
-            dim,
-        )?,
+        // trajectory file not provided, use gro or pdb file
+        None => center_structure_file(&mut system, "Reference", &args.output, output_type, dim)?,
 
-        // use xtc file
+        // use trajectory file
         Some(ref file) => {
-            if output_type != FileType::XTC {
-                return Err(Box::new(RunError::UnsupportedFileExtension(args.output)));
-            }
+            // determine the type of the input trajectory file
+            let input_type = FileType::from_name(file);
 
-            center_xtc_file(
-                &mut system,
-                file,
-                "Reference",
-                &args.output,
-                args.step,
-                dim,
-                args.silent,
-            )?;
+            match (input_type, output_type) {
+                (FileType::XTC, FileType::XTC) => center_xdr_file::<XtcReader, XtcWriter>(
+                    &mut system,
+                    "Reference",
+                    file,
+                    &args.output,
+                    args.step,
+                    dim,
+                    args.silent,
+                )?,
+
+                (FileType::XTC, FileType::TRR) => center_xdr_file::<XtcReader, TrrWriter>(
+                    &mut system,
+                    "Reference",
+                    file,
+                    &args.output,
+                    args.step,
+                    dim,
+                    args.silent,
+                )?,
+
+                (FileType::TRR, FileType::XTC) => center_xdr_file::<TrrReader, XtcWriter>(
+                    &mut system,
+                    "Reference",
+                    file,
+                    &args.output,
+                    args.step,
+                    dim,
+                    args.silent,
+                )?,
+
+                (FileType::TRR, FileType::TRR) => center_xdr_file::<TrrReader, TrrWriter>(
+                    &mut system,
+                    "Reference",
+                    file,
+                    &args.output,
+                    args.step,
+                    dim,
+                    args.silent,
+                )?,
+
+                _ => return Err(Box::new(RunError::UnsupportedFileExtension(args.output))),
+            }
         }
     }
 
