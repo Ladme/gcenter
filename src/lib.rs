@@ -19,8 +19,11 @@ const PRINT_FREQ: u64 = 500000;
     author,
     version,
     about,
-    long_about = "Center selected group in a Gromacs trajectory or structure file using Bai & Breen algorithm. 
-This program can properly center any group of atoms to the center of the simulation box, no matter whether the group consists of multiple molecules crossing the periodic boundary conditions."
+    long_about = "Center your chosen group within a Gromacs trajectory or structure file effortlessly using the Bai & Breen algorithm.\n
+With `gcenter`, you can accurately center atom groups, even when they span multiple molecules that may extend beyond the box boundaries.
+Note that `gcenter` does not employ connectivity information, so it doesn't require a tpr file as input. 
+However, it also lacks the capability to wrap molecules into the simulation box.
+Be aware that `gcenter` exclusively supports orthogonal simulation boxes."
 )]
 pub struct Args {
     #[arg(
@@ -51,7 +54,7 @@ pub struct Args {
         short = 'o',
         long = "output",
         help = "Name of the output file",
-        long_help = "Output gro, pdb (if no trajectory file is provided), or xtc file."
+        long_help = "Output gro, pdb (if no trajectory file is provided), xtc, or trr file."
     )]
     output: String,
 
@@ -60,7 +63,7 @@ pub struct Args {
         long = "reference",
         help = "Group to center",
         default_value = "Protein",
-        long_help = "Specification of the group that should be centered. Use groan selection language (similar to VMD) to specify the group. Groan selection language supports ndx group names."
+        long_help = "Specification of the group that should be centered. Use VMD-like `groan selection language` to specify the group. Groan selection language supports ndx group names."
     )]
     reference: String,
 
@@ -106,7 +109,7 @@ pub struct Args {
         action,
         help = "Do not print any output to stdout",
         default_value_t = false,
-        long_help = "\"Be silent! Keep your forked tongue behind your teeth.\" Setting this flag will restrict `gcenter` from producing output, apart from errors which are written into stderr."
+        long_help = "\"Be silent! Keep your forked tongue behind your teeth.\" Setting this flag will restrict `gcenter` from writing anything to the standard output, apart from errors which are written into stderr."
     )]
     silent: bool,
 
