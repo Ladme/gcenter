@@ -2,8 +2,11 @@
 name = "gcenter"
 authors = ["Ladislav Bartos <ladmeb@gmail.com>"]
 description = "Center Any Group in a Gromacs Trajectory"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
+repository = "https://github.com/Ladme/gcenter"
+keywords = ["gromacs", "molecular-dynamics"]
+categories = ["command-line-utilities", "science"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
