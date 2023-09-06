@@ -11,7 +11,7 @@ edition = "2021"
 backitup = "0.1.0"
 clap = { version = "4.3.0", features = ["derive"] }
 colored = "2.0.0"
-groan_rs = { path = "../groan_rs" }
+groan_rs = "0.1.0"
 thiserror = "1.0.40"
 
 [dev-dependencies]
