@@ -2,7 +2,8 @@
 name = "gcenter"
 authors = ["Ladislav Bartos <ladmeb@gmail.com>"]
 description = "Center Any Group in a Gromacs Trajectory"
-version = "1.0.0"
+version = "1.0.1"
+license = "MIT"
 edition = "2021"
 repository = "https://github.com/Ladme/gcenter"
 keywords = ["gromacs", "molecular-dynamics"]
@@ -11,14 +12,14 @@ categories = ["command-line-utilities", "science"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-backitup = "0.1.0"
-clap = { version = "4.3.0", features = ["derive"] }
-colored = "2.0.0"
-groan_rs = "0.1.0"
-thiserror = "1.0.40"
+backitup = "0.1.1"
+clap = { version = "4.4.3", features = ["derive"] }
+colored = "2.0.4"
+groan_rs = "0.2.0"
+thiserror = "1.0.48"
 
 [dev-dependencies]
-assert_cmd = "2.0.11"
+assert_cmd = "2.0.12"
 file_diff = "1.0.0"
-tempfile  = "3.5.0"
+tempfile  = "3.8.0"
 glob = "0.3.1"

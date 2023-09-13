@@ -145,7 +145,7 @@ pub enum RunError {
 /// Check that the input and output files are not identical.
 /// This protects the user from accidentaly overwriting their data.
 fn sanity_check_files(args: &Args) -> Result<(), RunError> {
-    if let None = args.trajectory {
+    if args.trajectory.is_none() {
         if args.structure == args.output {
             return Err(RunError::IOMatchStructure(args.structure.to_string()));
         }
@@ -191,7 +191,7 @@ fn print_progress(
 ) {
     print!(
         "[{: ^9}]   {} {:12} | {} {:9} ps\r",
-        status, step_fmt, sim_step, time_fmt, sim_time as u64
+        status, step_fmt, sim_step, time_fmt, sim_time
     );
     io::stdout().flush().unwrap();
 }
@@ -262,10 +262,8 @@ fn print_options(args: &Args, system: &System, dim: &Dimension) {
             "[INDEX]       {}",
             &args.index.clone().unwrap().bright_blue()
         );
-    } else {
-        if system.get_n_groups() > 2 {
-            println!("[INDEX]       index.ndx");
-        }
+    } else if system.get_n_groups() > 2 {
+        println!("[INDEX]       index.ndx");
     }
 
     if args.reference == "Protein" {
@@ -341,14 +339,12 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                     backup.to_str().unwrap().yellow()
                 );
             }
-        } else {
-            if !args.silent {
-                println!(
-                    "{} overwriting '{}'\n",
-                    "warning:".yellow().bold(),
-                    &args.output.yellow()
-                );
-            }
+        } else if !args.silent {
+            println!(
+                "{} overwriting '{}'\n",
+                "warning:".yellow().bold(),
+                &args.output.yellow()
+            );
         }
     }
 

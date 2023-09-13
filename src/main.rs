@@ -1,7 +1,6 @@
 // Released under MIT License.
 // Copyright (c) 2023 Ladislav Bartos
 
-use gcenter;
 use std::process;
 
 fn main() {
