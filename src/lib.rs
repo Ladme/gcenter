@@ -21,104 +21,103 @@ const PRINT_FREQ: u64 = 500000;
     about,
     long_about = "Center your chosen group within a Gromacs trajectory or structure file effortlessly using the Bai & Breen algorithm.\n
 With `gcenter`, you can accurately center atom groups, even when they span multiple molecules that may extend beyond the box boundaries.
-Note that `gcenter` does not employ connectivity information, so it doesn't require a tpr file as input. 
-However, it also lacks the capability to wrap molecules into the simulation box.
+`gcenter` does not employ connectivity information, so it doesn't require a tpr file as input. 
 Be aware that `gcenter` exclusively supports orthogonal simulation boxes."
 )]
 pub struct Args {
     #[arg(
         short = 'c',
         long = "structure",
-        help = "Structure file to read",
-        long_help = "Gro or pdb file containing the system structure. If trajectory is also supplied, coordinates from the structure file are ignored."
+        help = "Input structure file",
+        long_help = "Path to a gro or pdb file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored."
     )]
     structure: String,
 
     #[arg(
         short = 'f',
         long = "trajectory",
-        help = "Trajectory file to read",
-        long_help = "Xtc or trr file containing the trajectory which should be manipulated. If not provided, the structure file itself will be centered."
+        help = "Input trajectory file",
+        long_help = "Path to an xtc or trr file containing the trajectory to be manipulated. If not provided, the centering operation will use the structure file itself."
     )]
     trajectory: Option<String>,
 
     #[arg(
         short = 'n',
         long = "index",
-        help = "Index file to read [default: index.ndx]",
-        long_help = "Ndx file containing the groups associated with the system.\n\n[default: index.ndx]"
+        help = "Input index file (default: index.ndx)",
+        long_help = "Path to an ndx file containing groups associated with the system.\n\n[default: index.ndx]"
     )]
     index: Option<String>,
 
     #[arg(
         short = 'o',
         long = "output",
-        help = "Name of the output file",
-        long_help = "Output gro, pdb (if no trajectory file is provided), xtc, or trr file."
+        help = "Output file name",
+        long_help = "Name of the output file, which can be in gro, pdb (if no trajectory is provided), xtc, or trr format."
     )]
     output: String,
 
     #[arg(
         short = 'r',
         long = "reference",
-        help = "Group to center",
+        help = "Group to center (default: Protein)",
         default_value = "Protein",
-        long_help = "Specification of the group that should be centered. Use VMD-like `groan selection language` to specify the group. Groan selection language supports ndx group names."
+        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names."
     )]
     reference: String,
 
     #[arg(
         short = 's',
         long = "step",
-        help = "Write every <STEP>th frame",
+        help = "Write every <STEP>th frame (default: 1)",
         default_value_t = 1,
         requires = "trajectory",
-        long_help = "Only every <STEP>th frame of the trajectory will be centered and written into the output file."
+        long_help = "Center and write only every <STEP>th frame of the trajectory to the output file. This option is only applicable when a trajectory file is provided."
     )]
     step: usize,
 
     #[arg(
         short = 'x',
         action,
-        help = "Center in x dimension",
+        help = "Center in the x dimension",
         default_value_t = false,
-        long_help = "Center the selected group in the x-dimension only. Can be combined with other dimensions. If no dimension is selected, defaults to `-xyz`."
+        long_help = "Perform centering operation in the x-dimension. This can be combined with other dimensions. If no dimensions are selected, it defaults to '-xyz'."
     )]
     xdimension: bool,
 
     #[arg(
         short = 'y',
         action,
-        help = "Center in y dimension",
+        help = "Center in the y dimension",
         default_value_t = false,
-        long_help = "Center the selected group in the y-dimension only. Can be combined with other dimensions. If no dimension is selected, defaults to `-xyz`."
+        long_help = "Perform centering operation in the y-dimension. This can be combined with other dimensions. If no dimensions are selected, it defaults to '-xyz'."
     )]
     ydimension: bool,
 
     #[arg(
         short = 'z',
         action,
-        help = "Center in z dimension",
+        help = "Center in the z dimension",
         default_value_t = false,
-        long_help = "Center the selected group in the z-dimension only. Can be combined with other dimensions. If no dimension is selected, defaults to `-xyz`."
+        long_help = "Perform centering operation in the z-dimension. This can be combined with other dimensions. If no dimensions are selected, it defaults to '-xyz'."
     )]
     zdimension: bool,
 
     #[arg(
         long = "silent",
         action,
-        help = "Do not print any output to stdout",
+        help = "Suppress standard output",
         default_value_t = false,
-        long_help = "\"Be silent! Keep your forked tongue behind your teeth.\" Setting this flag will restrict `gcenter` from writing anything to the standard output, apart from errors which are written into stderr."
+        long_help = "Suppress all standard output generated by the 'gcenter' tool, except for error messages written to stderr."
     )]
     silent: bool,
 
     #[arg(
         long = "overwrite",
         action,
-        help = "Overwrite any file sharing the name with the output file",
+        help = "Overwrite existing files with the same name",
         default_value_t = false,
-        long_help = "Setting this flag will restrict `gcenter` from creating backup for the file sharing the name with the output file. Any such file will be overwritten."
+        long_help = "Enable this option to overwrite existing files with the same name as the output file. No backup copies will be created."
     )]
     overwrite: bool,
 }
