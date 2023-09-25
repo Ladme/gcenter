@@ -622,6 +622,75 @@ mod pass_tests {
 
         fs::remove_file("tests/test_files/temporary_overwrite.gro").unwrap();
     }
+
+    #[test]
+    fn silent() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "--silent",
+            ])
+            .assert()
+            .success()
+            .stdout("");
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn group_overwrite_default() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index_with_reference.ndx",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-r(resname ASN and serial 35 to 45 and name BB)",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_group.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn group_overwrite_during_autodetection() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index_with_reference.ndx",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-rProtein",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
 }
 
 #[cfg(test)]
@@ -668,6 +737,24 @@ mod fail_tests {
             .failure();
 
         std::fs::remove_file("tests/test_files/tmp_input.xtc").unwrap();
+    }
+
+    #[test]
+    fn nonexistent_group() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-rNonexistent",
+                "-ntests/test_files/index.ndx",
+            ])
+            .assert()
+            .failure();
     }
 
     #[test]

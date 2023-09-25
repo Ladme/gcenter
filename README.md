@@ -4,7 +4,7 @@ Center your chosen group within a Gromacs trajectory or structure file effortles
 
 `gcenter` can accurately center atom groups, even when they span multiple molecules that may extend beyond the box boundaries. `gcenter` does not employ connectivity information, so it doesn't require a tpr file as input. `gcenter` exclusively supports orthogonal simulation boxes.
 
-`gcenter` supports gro and pdb structure files and xtc and trr trajectories and it can autodetect protein residues. Use VMD-like [groan selection language](https://docs.rs/groan_rs/0.1.0/groan_rs/#groan-selection-language) to select groups of atoms to center.
+`gcenter` supports gro and pdb structure files and xtc and trr trajectories and it can autodetect protein residues. Use VMD-like [groan selection language](https://docs.rs/groan_rs/latest/groan_rs/#groan-selection-language) to select groups of atoms to center.
 
 ## Installation
 

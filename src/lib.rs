@@ -7,6 +7,7 @@ use std::io::{self, Write};
 use std::path::Path;
 use thiserror::Error;
 
+use groan_rs::errors::GroupError;
 use groan_rs::files::FileType;
 use groan_rs::prelude::*;
 
@@ -29,7 +30,8 @@ pub struct Args {
         short = 'c',
         long = "structure",
         help = "Input structure file",
-        long_help = "Path to a gro or pdb file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored."
+        long_help = "Path to a gro or pdb file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored.",
+        value_parser = validate_structure_type,
     )]
     structure: String,
 
@@ -37,14 +39,15 @@ pub struct Args {
         short = 'f',
         long = "trajectory",
         help = "Input trajectory file",
-        long_help = "Path to an xtc or trr file containing the trajectory to be manipulated. If not provided, the centering operation will use the structure file itself."
+        long_help = "Path to an xtc or trr file containing the trajectory to be manipulated. If not provided, the centering operation will use the structure file itself.",
+        value_parser = validate_trajectory_type,
     )]
     trajectory: Option<String>,
 
     #[arg(
         short = 'n',
         long = "index",
-        help = "Input index file (default: index.ndx)",
+        help = "Input index file [default: index.ndx]",
         long_help = "Path to an ndx file containing groups associated with the system.\n\n[default: index.ndx]"
     )]
     index: Option<String>,
@@ -60,7 +63,7 @@ pub struct Args {
     #[arg(
         short = 'r',
         long = "reference",
-        help = "Group to center (default: Protein)",
+        help = "Group to center",
         default_value = "Protein",
         long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names."
     )]
@@ -69,7 +72,7 @@ pub struct Args {
     #[arg(
         short = 's',
         long = "step",
-        help = "Write every <STEP>th frame (default: 1)",
+        help = "Write every <STEP>th frame",
         default_value_t = 1,
         requires = "trajectory",
         long_help = "Center and write only every <STEP>th frame of the trajectory to the output file. This option is only applicable when a trajectory file is provided."
@@ -125,10 +128,10 @@ pub struct Args {
 /// Errors originating directly from `gcenter`.
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum RunError {
-    #[error("{} structure file '{}' is the same file as the output file", "error:".red().bold(), .0.yellow())]
-    IOMatchStructure(String),
-    #[error("{} trajectory file '{}' is the same file as the output file", "error:".red().bold(), .0.yellow())]
-    IOMatchTrajectory(String),
+    #[error("{} invalid value '{}' for '{}': output path matches input path\n\nFor more information, try '{}'.", "error:".red().bold(), .0.yellow(), "--output <OUTPUT>".bold(), "--help".bold())]
+    IOMatch(String),
+    #[error("{} invalid value '{}' for '{}': unsupported file extension\n\nFor more information, try '{}'.", "error:".red().bold(), .0.yellow(), "--output <OUTPUT>".bold(), "--help".bold())]
+    OutputUnsupported(String),
     #[error("{} reference group '{}' is empty", "error:".red().bold(), .0.yellow())]
     EmptyReference(String),
     #[error("{} no protein atoms autodetected", "error:".red().bold())]
@@ -141,20 +144,44 @@ pub enum RunError {
     UnsupportedFileExtension(String),
 }
 
+/// Validate that the structure is gro or pdb file.
+fn validate_structure_type(s: &str) -> Result<String, String> {
+    match FileType::from_name(s) {
+        FileType::GRO | FileType::PDB => Ok(s.to_owned()),
+        _ => Err(String::from("unsupported file extension")),
+    }
+}
+
+/// Validate that the trajectory is xtc or trr file.
+fn validate_trajectory_type(s: &str) -> Result<String, String> {
+    match FileType::from_name(s) {
+        FileType::XTC | FileType::TRR => Ok(s.to_owned()),
+        _ => Err(String::from("unsupported file extension")),
+    }
+}
+
 /// Check that the input and output files are not identical.
 /// This protects the user from accidentaly overwriting their data.
+/// Check that the output file has the correct file extension.
 fn sanity_check_files(args: &Args) -> Result<(), RunError> {
     if args.trajectory.is_none() {
         if args.structure == args.output {
-            return Err(RunError::IOMatchStructure(args.structure.to_string()));
+            return Err(RunError::IOMatch(args.structure.to_string()));
         }
     } else if *args.trajectory.as_ref().unwrap() == args.output {
-        return Err(RunError::IOMatchTrajectory(
+        return Err(RunError::IOMatch(
             args.trajectory.as_ref().unwrap().to_string(),
         ));
     }
 
-    Ok(())
+    let output_type = FileType::from_name(&args.output);
+
+    match (&args.trajectory, output_type) {
+        (None, FileType::GRO | FileType::PDB) => Ok(()),
+        (None, _) => Err(RunError::OutputUnsupported(args.output.clone())),
+        (Some(_), FileType::XTC | FileType::TRR) => Ok(()),
+        (Some(_), _) => Err(RunError::OutputUnsupported(args.output.clone())),
+    }
 }
 
 /// Center the reference group and write an output gro or pdb file.
@@ -289,14 +316,12 @@ fn print_options(args: &Args, system: &System, dim: &Dimension) {
 /// Perform the centering.
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    sanity_check_files(&args)?;
 
     if !args.silent {
         let version = format!("\n >> gcenter {} <<\n", env!("CARGO_PKG_VERSION"));
         println!("{}", version.bold());
     }
-
-    // check that the input file is not the same as the output file
-    sanity_check_files(&args)?;
 
     // construct a dimension; if no dimension has been chosen, use all of them
     let dim: Dimension = match [args.xdimension, args.ydimension, args.zdimension].into() {
@@ -349,25 +374,25 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     // select reference atoms
     let autodetect = match system.group_create("Reference", &args.reference) {
-        Ok(_) => false,
-        Err(e) => {
-            if &args.reference == "Protein" {
-                if !args.silent {
-                    println!(
-                        "{} group '{}' not found. Autodetecting protein atoms...\n",
-                        "warning:".yellow().bold(),
-                        "Protein".yellow()
-                    );
-                }
+        // ignore group overwrite
+        Ok(_) | Err(GroupError::AlreadyExistsWarning(_)) => false,
+        // if the reference group is 'Protein' and such group does not exist, try autodetecting the protein atoms
+        Err(GroupError::InvalidQuery(_)) if &args.reference == "Protein" => {
+            if !args.silent {
+                println!(
+                    "{} group '{}' not found. Autodetecting protein atoms...\n",
+                    "warning:".yellow().bold(),
+                    "Protein".yellow()
+                );
+            }
 
-                system
-                    .group_create("Reference", "@protein")
-                    .expect("gcenter: Fatal Error. Autodetection failed.");
-                true
-            } else {
-                return Err(e);
+            match system.group_create("Reference", "@protein") {
+                Ok(_) | Err(GroupError::AlreadyExistsWarning(_)) => true,
+                Err(_) => panic!("gcenter: Fatal Error. Autodetection failed."),
             }
         }
+        // propagate all the other errors
+        Err(e) => return Err(Box::from(e)),
     };
 
     // check that the reference group is not empty
