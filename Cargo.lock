@@ -276,7 +276,7 @@ checksum = "31a7a908b8f32538a2143e59a6e4e2508988832d5d4d6f7c156b3cbc762643a5"
 
 [[package]]
 name = "gcenter"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
  "assert_cmd",
  "backitup",
@@ -297,9 +297,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "groan_rs"
-version = "0.3.1"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63a6e02fb640818f700b234f4b0a2be996c10ce1ce33eeeae9536fd07e157577"
+checksum = "0763c3647f2fa8af2801805b49e047058a93f8a9e65b4a8e0d1fadcaf0f8dbef"
 dependencies = [
  "cc",
  "colored",

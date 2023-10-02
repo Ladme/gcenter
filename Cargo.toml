@@ -2,7 +2,7 @@
 name = "gcenter"
 authors = ["Ladislav Bartos <ladmeb@gmail.com>"]
 description = "Center Any Group in a Gromacs Trajectory"
-version = "1.0.3"
+version = "1.0.4"
 license = "MIT"
 edition = "2021"
 repository = "https://github.com/Ladme/gcenter"
@@ -15,7 +15,7 @@ categories = ["command-line-utilities", "science"]
 backitup = "0.1.1"
 clap = { version = "4.4.3", features = ["derive"] }
 colored = "2.0.4"
-groan_rs = "0.3.1"
+groan_rs = "0.3.3"
 thiserror = "1.0.48"
 
 [dev-dependencies]
