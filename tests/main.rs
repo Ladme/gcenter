@@ -541,6 +541,73 @@ mod pass_tests {
     }
 
     #[test]
+    fn regex() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index.ndx",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-rr'^T.*_all$'",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_begin() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-b400",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_end() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-e700",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_end.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_xtc_step() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -558,6 +625,359 @@ mod pass_tests {
 
         assert!(file_diff::diff(
             "tests/test_files/output_xyz_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_begin_end() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-b400",
+                "-e800",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_begin_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-b400",
+                "-s3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_end_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-e800",
+                "-s3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_end_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_begin_end_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-b400",
+                "-e800",
+                "-s3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_multiple_inputs() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_multiple_inputs_begin() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-b400",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_multiple_inputs_end() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-e700",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_end.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_multiple_inputs_begin_end() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-b400",
+                "-e800",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_begin_end() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+                "-b400",
+                "-e800",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_begin_end_step() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+                "-b400",
+                "-e800",
+                "-s3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end_step.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_to_trr_multiple_inputs() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_xtc.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_to_trr_multiple_inputs() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.trr",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.trr",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_trr.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_to_xtc_multiple_inputs() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.trr",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.trr",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_trr_multiple_inputs_begin_end() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.trr",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.trr",
+                "-b400",
+                "-e800",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_and_trr_multiple_inputs() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
             output.path().to_str().unwrap()
         ));
     }
@@ -740,6 +1160,28 @@ mod fail_tests {
     }
 
     #[test]
+    fn file_protection_xtc_multiple() {
+        std::fs::copy(
+            "tests/test_files/input.xtc",
+            "tests/test_files/tmp_input2.xtc",
+        )
+        .unwrap();
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ftests/test_files/input.xtc",
+                "-ftests/test_files/tmp_input2.xtc",
+                "-otests/test_files/tmp_input2.xtc",
+            ])
+            .assert()
+            .failure();
+
+        std::fs::remove_file("tests/test_files/tmp_input2.xtc").unwrap();
+    }
+
+    #[test]
     fn nonexistent_group() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -904,6 +1346,78 @@ mod fail_tests {
                 "-ctests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn begin_requires_traj() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg, "-b400"])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn end_requires_traj() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg, "-e700"])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn step_requires_traj() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.gro", &output_arg, "-s3"])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn multiple_input_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-s3",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn multiple_inputs_identical() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part1.xtc",
             ])
             .assert()
             .failure();
