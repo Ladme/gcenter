@@ -983,6 +983,29 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_xtc_multiple_noncontinuous() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part3.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_swapped.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn backup() {
         let mut file = File::create("tests/test_files/temporary.gro").unwrap();
         file.write_all(b"Some content to test.").unwrap();
