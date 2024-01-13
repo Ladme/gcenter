@@ -29,25 +29,6 @@ pub enum RunError {
     BoxNotOrthogonal,
     #[error("{} simulation box is not a valid simulation box; some required dimensions are not positive\n", "error:".red().bold())]
     BoxNotValid,
+    #[error("{} simulation box is not defined\n", "error:".red().bold())]
+    BoxNotDefined,
 }
-
-/* // [DEV] print all RunErrors
-pub fn print_all_errors() {
-    let errors = vec![
-        RunError::IOMatch(String::from("N/A")),
-        RunError::OutputUnsupported(String::from("N/A")),
-        RunError::IdenticalInputFiles(String::from("N/A"), String::from("N/A")),
-        RunError::StepJoinUnsupported(3),
-        RunError::InputStructureNotFound(String::from("N/A")),
-        RunError::InputTrajectoryNotFound(String::from("N/A")),
-        RunError::EmptyReference(String::from("N/A")),
-        RunError::AutodetectionFailed,
-        RunError::BoxNotOrthogonal,
-        RunError::BoxNotValid,
-    ];
-
-    for e in errors {
-        println!("{}", e);
-    }
-}
-*/

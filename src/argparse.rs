@@ -126,6 +126,15 @@ If the simulation steps coincide, only the first of these frames is centered and
     pub zdimension: bool,
 
     #[arg(
+        long = "com",
+        action,
+        help = "Center frames using center of mass",
+        default_value_t = false,
+        long_help = "Use center of mass instead of center of geometry when centering the reference group. This requires information about atom masses. If not explicitely provided, the masses are guessed."
+    )]
+    pub com: bool,
+
+    #[arg(
         long = "silent",
         action,
         help = "Suppress standard output",
@@ -214,7 +223,7 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
     }
 }
 
-pub fn parse() -> Result<Args, Box<dyn std::error::Error>> {
+pub fn parse() -> Result<Args, Box<dyn std::error::Error + Send + Sync>> {
     let args = Args::parse();
     sanity_check_inputs(&args)?;
 

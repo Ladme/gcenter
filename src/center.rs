@@ -3,74 +3,13 @@
 
 //! Implementation of the centering procedure.
 
-use colored::{ColoredString, Colorize};
+use colored::Colorize;
 use groan_rs::errors::ReadTrajError;
 use groan_rs::files::FileType;
 use groan_rs::prelude::*;
-use std::io::{self, Write};
 use std::path::Path;
 
 use crate::argparse::Args;
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum ProgressStatus {
-    Running,
-    Completed,
-    Failed,
-}
-
-/// Structure containing formatting for the printing of the centering progress.
-#[derive(Debug, PartialEq)]
-struct ProgressPrinter {
-    status: ProgressStatus,
-    print_freq: u64,
-    silent: bool,
-    step_fmt: ColoredString,
-    time_fmt: ColoredString,
-    running_fmt: ColoredString,
-    completed_fmt: ColoredString,
-    failed_fmt: ColoredString,
-}
-
-impl ProgressPrinter {
-    /// Create default instance of the `ProgressPrinter`.
-    fn new(silent: bool) -> Self {
-        ProgressPrinter {
-            silent,
-            print_freq: 500000,
-            status: ProgressStatus::Running,
-            step_fmt: "Step:".cyan(),
-            time_fmt: "Time:".bright_purple(),
-            running_fmt: "CENTERING".yellow(),
-            completed_fmt: "COMPLETED".green(),
-            failed_fmt: " FAILED! ".red(),
-        }
-    }
-
-    /// Print progress info with formatting from `ProgressPrinter`.
-    fn print(&self, sim_step: u64, sim_time: u64) {
-        if !self.silent
-            && (self.status != ProgressStatus::Running || sim_step % self.print_freq == 0)
-        {
-            match self.status {
-                ProgressStatus::Running => print!("[{: ^9}]   ", self.running_fmt),
-                ProgressStatus::Completed => print!("[{: ^9}]   ", self.completed_fmt),
-                ProgressStatus::Failed => print!("[{: ^9}]   ", self.failed_fmt),
-            }
-
-            print!(
-                "{} {:12} | {} {:12} ps\r",
-                self.step_fmt, sim_step, self.time_fmt, sim_time
-            );
-
-            io::stdout().flush().unwrap();
-        }
-    }
-
-    fn set_status(&mut self, status: ProgressStatus) {
-        self.status = status;
-    }
-}
 
 /// Center the reference group and write an output gro or pdb file.
 fn center_structure_file(
@@ -78,31 +17,14 @@ fn center_structure_file(
     output: &str,
     output_type: FileType,
     dimension: Dimension,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     system.atoms_center("Reference", dimension)?;
 
     match output_type {
         FileType::GRO => system.write_gro(output, system.has_velocities())?,
-        FileType::PDB => system.write_pdb(output)?,
+        FileType::PDB => system.write_pdb(output, system.has_bonds())?,
         _ => panic!("Gcenter error. Output file has unsupported file extension but this should have been handled before."),
     }
-
-    Ok(())
-}
-
-/// Center a single simulation frame.
-fn center_frame(
-    frame: &mut System,
-    dimension: Dimension,
-    writer: &mut impl TrajWrite,
-    printer: &ProgressPrinter,
-) -> Result<(), Box<dyn std::error::Error>> {
-    printer.print(
-        frame.get_simulation_step(),
-        frame.get_simulation_time() as u64,
-    );
-    frame.atoms_center("Reference", dimension)?;
-    writer.write_frame()?;
 
     Ok(())
 }
@@ -112,10 +34,10 @@ fn handle_frame(
     frame: Result<&mut System, ReadTrajError>,
     dimension: Dimension,
     writer: &mut impl TrajWrite,
-    printer: &ProgressPrinter,
     last_step: Option<u64>,
     is_first_frame: &mut bool,
-) -> Result<(), Box<dyn std::error::Error>> {
+    com: bool,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let frame = frame?;
 
     if *is_first_frame {
@@ -129,7 +51,15 @@ fn handle_frame(
         *is_first_frame = false;
     }
 
-    center_frame(frame, dimension, writer, printer)
+    if com {
+        frame.atoms_center_mass("Reference", dimension)?;
+    } else {
+        frame.atoms_center("Reference", dimension)?;
+    }
+
+    writer.write_frame()?;
+
+    Ok(())
 }
 
 /// Center any trajectory file.
@@ -141,15 +71,19 @@ fn center_traj_file<'a, Reader>(
     end_time: Option<f32>,
     step: usize,
     dimension: Dimension,
-    printer: &ProgressPrinter,
     last_step: Option<u64>,
     is_last_file: bool,
-) -> Result<(), Box<dyn std::error::Error>>
+    silent: bool,
+    com: bool,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
 where
     Reader: TrajRead<'a> + TrajRangeRead<'a> + TrajStepRead<'a> + 'a,
     Reader::FrameData: FrameDataTime,
 {
     let mut reader = system.traj_iter::<Reader>(&trajectory)?;
+    if !silent {
+        reader = reader.print_progress(ProgressPrinter::new().with_running_msg("CENTERING".yellow()));
+    }
 
     let mut is_first_frame = true;
 
@@ -158,9 +92,9 @@ where
             frame,
             dimension,
             writer,
-            printer,
             last_step,
             &mut is_first_frame,
+            com,
         )
     };
 
@@ -203,8 +137,7 @@ fn center_trajectories(
     args: &Args,
     writer: &mut impl TrajWrite,
     dimension: Dimension,
-    printer: &ProgressPrinter,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     for (t, traj) in args.trajectories.iter().enumerate() {
         let input_type = FileType::from_name(traj);
 
@@ -225,9 +158,10 @@ fn center_trajectories(
                 args.end_time,
                 args.step,
                 dimension,
-                printer,
                 last_step,
                 is_last_file,
+                args.silent,
+                args.com,
             )?,
 
             FileType::TRR => center_traj_file::<TrrReader>(
@@ -238,9 +172,10 @@ fn center_trajectories(
                 args.end_time,
                 args.step,
                 dimension,
-                printer,
                 last_step,
                 is_last_file,
+                args.silent,
+                args.com
             )?,
 
             _ => panic!("Gcenter error. Input file has unsupported file extension but this should have been handled before."),
@@ -255,7 +190,7 @@ pub fn center(
     system: &mut System,
     args: &Args,
     dimension: Dimension,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // determine type of the output file
     let output_type = FileType::from_name(&args.output);
 
@@ -263,46 +198,17 @@ pub fn center(
         // trajectory file not provided, center the structure file
         center_structure_file(system, &args.output, output_type, dimension)?;
     } else {
-        let mut printer = ProgressPrinter::new(args.silent);
-
-        let return_type = match output_type {
+        match output_type {
             FileType::XTC => {
                 let mut writer = XtcWriter::new(system, &args.output)?;
-                center_trajectories(system, args, &mut writer, dimension, &printer)
+                center_trajectories(system, args, &mut writer, dimension)?
             }
             FileType::TRR => {
                 let mut writer = TrrWriter::new(system, &args.output)?;
-                center_trajectories(system, args, &mut writer, dimension, &printer)
+                center_trajectories(system, args, &mut writer, dimension)?
             }
             _ => panic!("Gcenter error. Output file has unsupported file extension but this should have been handled before."),
         };
-
-        match return_type {
-            Ok(_) => {
-                printer.set_status(ProgressStatus::Completed);
-                printer.print(
-                    system.get_simulation_step(),
-                    system.get_simulation_time() as u64,
-                );
-
-                if !args.silent {
-                    println!("\n")
-                }
-            }
-            Err(e) => {
-                printer.set_status(ProgressStatus::Failed);
-                printer.print(
-                    system.get_simulation_step(),
-                    system.get_simulation_time() as u64,
-                );
-
-                if !args.silent {
-                    println!("\n")
-                }
-
-                return Err(e);
-            }
-        }
     }
 
     Ok(())
