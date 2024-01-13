@@ -1,5 +1,5 @@
 // Released under MIT License.
-// Copyright (c) 2023 Ladislav Bartos
+// Copyright (c) 2023-2024 Ladislav Bartos
 
 mod argparse;
 mod center;
@@ -7,6 +7,7 @@ mod errors;
 mod reference;
 
 use colored::Colorize;
+use groan_rs::errors::ElementError;
 use groan_rs::prelude::*;
 use std::path::Path;
 
@@ -66,20 +67,33 @@ fn print_options(args: &Args, system: &System, dim: &Dimension) {
         println!("[STEP]          {}", &args.step.to_string().bright_blue());
     }
 
+    if args.com {
+        println!("[METHOD]        {}", "center of mass".bright_blue());
+    }
+
     println!();
 }
 
+/// Guess elements for target system printing warnings and returning errors.
+fn guess_elements(system: &mut System) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    match system.guess_elements(Elements::default()) {
+        Ok(_) => Ok(()),
+        Err(ElementError::ElementGuessWarning(e)) => {
+            eprintln!("{}", ElementError::ElementGuessWarning(e));
+            Ok(())
+        }
+        Err(e) => Err(Box::from(e)),
+    }
+}
+
 /// Perform the centering.
-pub fn run() -> Result<(), Box<dyn std::error::Error>> {
+pub fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let args = argparse::parse()?;
 
     if !args.silent {
         let version = format!("\n >> gcenter {} <<\n", env!("CARGO_PKG_VERSION"));
         println!("{}", version.bold());
     }
-
-    // [DEV] print all errors
-    // errors::print_all_errors();
 
     // construct a dimension; if no dimension has been chosen, use all of them
     let dim: Dimension = match [args.xdimension, args.ydimension, args.zdimension].into() {
@@ -90,15 +104,19 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     // read structure file
     let mut system = System::from_file(&args.structure)?;
 
-    // check that box has positive dimensions
-    if !system.get_box_as_ref().is_valid() {
-        return Err(Box::from(RunError::BoxNotValid));
-    }
+    // check the simulation is valid (defined, non-zero and orthogonal)
+    match system.get_box_as_ref() {
+        None => return Err(Box::from(RunError::BoxNotDefined)),
+        Some(x) => {
+            if x.is_zero() {
+                return Err(Box::from(RunError::BoxNotValid));
+            }
 
-    // check that the simulation box is orthogonal
-    if !system.get_box_as_ref().is_orthogonal() {
-        return Err(Box::from(RunError::BoxNotOrthogonal));
-    }
+            if !x.is_orthogonal() {
+                return Err(Box::from(RunError::BoxNotOrthogonal));
+            }
+        }
+    };
 
     // read ndx file
     system.read_ndx_with_default(&args.index, "index.ndx")?;
@@ -128,6 +146,21 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 &args.output.yellow()
             );
         }
+    }
+
+    // guess elements and assign masses, if needed
+    if args.com {
+        if !args.silent {
+            println!("{} center of mass calculation requested; will guess elements and assign masses...\n", "note:".purple().bold());
+        }
+
+        guess_elements(&mut system)?;
+    } else if args.reference.contains("element") {
+        if !args.silent {
+            println!("{} element keyword detected in query; will guess elements...\n", "note:".purple().bold());
+        }
+
+        guess_elements(&mut system)?;
     }
 
     // select reference atoms

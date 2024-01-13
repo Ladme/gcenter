@@ -1,5 +1,5 @@
 // Released under MIT License.
-// Copyright (c) 2023 Ladislav Bartos
+// Copyright (c) 2023-2024 Ladislav Bartos
 
 //! Implementation of a command line argument parser.
 
@@ -66,7 +66,8 @@ If the simulation steps coincide, only the first of these frames is centered and
         long = "reference",
         help = "Group to center",
         default_value = "Protein",
-        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names."
+        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names.",
+        value_parser = validate_reference
     )]
     pub reference: String,
 
@@ -126,6 +127,15 @@ If the simulation steps coincide, only the first of these frames is centered and
     pub zdimension: bool,
 
     #[arg(
+        long = "com",
+        action,
+        help = "Center frames using center of mass",
+        default_value_t = false,
+        long_help = "Use center of mass instead of center of geometry when centering the reference group. This requires information about atom masses. If not explicitely provided, the masses are guessed."
+    )]
+    pub com: bool,
+
+    #[arg(
         long = "silent",
         action,
         help = "Suppress standard output",
@@ -158,6 +168,15 @@ fn validate_trajectory_type(s: &str) -> Result<String, String> {
     match FileType::from_name(s) {
         FileType::XTC | FileType::TRR => Ok(s.to_owned()),
         _ => Err(String::from("unsupported file extension")),
+    }
+}
+
+/// Validate that the GSL query does not contain any unsupported keywords.
+fn validate_reference(s: &str) -> Result<String, String> {
+    if s.contains("molecule with") || s.contains("mol with") {
+        Err(String::from("gcenter does not employ connectivity and therefore does not support GSL keyword `molecule with`"))
+    } else {
+        Ok(s.to_owned())
     }
 }
 
@@ -214,7 +233,7 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
     }
 }
 
-pub fn parse() -> Result<Args, Box<dyn std::error::Error>> {
+pub fn parse() -> Result<Args, Box<dyn std::error::Error + Send + Sync>> {
     let args = Args::parse();
     sanity_check_inputs(&args)?;
 
