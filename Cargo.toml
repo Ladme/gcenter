@@ -16,7 +16,7 @@ exclude = ["/tests"]
 backitup = "0.1.1"
 clap = { version = "4.4.3", features = ["derive"] }
 colored = "2.0.4"
-groan_rs = "0.6.0"
+groan_rs = "0.6.1"
 thiserror = "1.0.48"
 
 [dev-dependencies]

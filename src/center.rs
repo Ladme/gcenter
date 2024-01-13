@@ -85,7 +85,8 @@ where
     if !args.silent {
         reader =
             reader.print_progress(ProgressPrinter::new()
-                .with_running_msg("CENTERING".yellow()));
+                .with_running_msg("CENTERING".yellow())
+                .with_newline_at_end(false));
     }
 
     let mut is_first_frame = true;
@@ -154,6 +155,9 @@ fn center_trajectories(
 
         // check whether we have already reached the requested end time
         // skip the rest of the files, if this is the case
+        // NOTE: this will only work if there is a time in the trajectory that exactly matches `args.end_time`
+        // in all other cases, we will have to loop through the rest of the files, but that's not really an issue
+        // since we just check the first trajectory frame for each of them
         if let Some(end) = args.end_time {
             if system.get_simulation_time() >= end {
                 return Ok(());
@@ -214,7 +218,7 @@ pub fn center(
         };
 
         if !args.silent {
-            println!();
+            println!("\n");
         }
         
     }
