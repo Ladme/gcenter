@@ -1,5 +1,5 @@
 // Released under MIT License.
-// Copyright (c) 2023 Ladislav Bartos
+// Copyright (c) 2023-2024 Ladislav Bartos
 
 //! Implementation of the centering procedure.
 
@@ -17,8 +17,13 @@ fn center_structure_file(
     output: &str,
     output_type: FileType,
     dimension: Dimension,
+    com: bool,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    system.atoms_center("Reference", dimension)?;
+    if com {
+        system.atoms_center_mass("Reference", dimension)?
+    } else {
+        system.atoms_center("Reference", dimension)?;
+    }
 
     match output_type {
         FileType::GRO => system.write_gro(output, system.has_velocities())?,
@@ -67,22 +72,20 @@ fn center_traj_file<'a, Reader>(
     system: &'a mut System,
     trajectory: impl AsRef<Path>,
     writer: &mut impl TrajWrite,
-    start_time: Option<f32>,
-    end_time: Option<f32>,
-    step: usize,
+    args: &Args,
     dimension: Dimension,
     last_step: Option<u64>,
     is_last_file: bool,
-    silent: bool,
-    com: bool,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
 where
     Reader: TrajRead<'a> + TrajRangeRead<'a> + TrajStepRead<'a> + 'a,
     Reader::FrameData: FrameDataTime,
 {
     let mut reader = system.traj_iter::<Reader>(&trajectory)?;
-    if !silent {
-        reader = reader.print_progress(ProgressPrinter::new().with_running_msg("CENTERING".yellow()));
+    if !args.silent {
+        reader =
+            reader.print_progress(ProgressPrinter::new()
+                .with_running_msg("CENTERING".yellow()));
     }
 
     let mut is_first_frame = true;
@@ -94,18 +97,18 @@ where
             writer,
             last_step,
             &mut is_first_frame,
-            com,
+            args.com,
         )
     };
 
-    match (start_time, end_time, step) {
-        (Some(s), _, 1) => match reader.with_range(s, end_time.unwrap_or(f32::MAX)) {
+    match (args.start_time, args.end_time, args.step) {
+        (Some(s), _, 1) => match reader.with_range(s, args.end_time.unwrap_or(f32::MAX)) {
             Ok(mut r) => r.try_for_each(process_frame)?,
             Err(ReadTrajError::StartNotFound(_)) if !is_last_file => (),
             Err(e) => return Err(Box::new(e)),
         },
 
-        (_, Some(e), 1) => match reader.with_range(start_time.unwrap_or(0.0), e) {
+        (_, Some(e), 1) => match reader.with_range(args.start_time.unwrap_or(0.0), e) {
             Ok(mut r) => r.try_for_each(process_frame)?,
             Err(ReadTrajError::StartNotFound(_)) if !is_last_file => (),
             Err(e) => return Err(Box::new(e)),
@@ -113,13 +116,13 @@ where
 
         (None, None, 1) => reader.try_for_each(process_frame)?,
 
-        (Some(s), _, step) => match reader.with_range(s, end_time.unwrap_or(f32::MAX)) {
+        (Some(s), _, step) => match reader.with_range(s, args.end_time.unwrap_or(f32::MAX)) {
             Ok(r) => r.with_step(step)?.try_for_each(process_frame)?,
             Err(ReadTrajError::StartNotFound(_)) if !is_last_file => (),
             Err(e) => return Err(Box::new(e)),
         },
 
-        (_, Some(e), step) => match reader.with_range(start_time.unwrap_or(0.0), e) {
+        (_, Some(e), step) => match reader.with_range(args.start_time.unwrap_or(0.0), e) {
             Ok(r) => r.with_step(step)?.try_for_each(process_frame)?,
             Err(ReadTrajError::StartNotFound(_)) if !is_last_file => (),
             Err(e) => return Err(Box::new(e)),
@@ -149,33 +152,33 @@ fn center_trajectories(
         // check whether this is a last file
         let is_last_file = t == args.trajectories.len() - 1;
 
+        // check whether we have already reached the requested end time
+        // skip the rest of the files, if this is the case
+        if let Some(end) = args.end_time {
+            if system.get_simulation_time() >= end {
+                return Ok(());
+            }
+        }
+
         match input_type {
             FileType::XTC => center_traj_file::<XtcReader>(
                 system,
                 traj,
                 writer,
-                args.start_time,
-                args.end_time,
-                args.step,
+                args,
                 dimension,
                 last_step,
                 is_last_file,
-                args.silent,
-                args.com,
             )?,
 
             FileType::TRR => center_traj_file::<TrrReader>(
                 system,
                 traj,
                 writer,
-                args.start_time,
-                args.end_time,
-                args.step,
+                args,
                 dimension,
                 last_step,
                 is_last_file,
-                args.silent,
-                args.com
             )?,
 
             _ => panic!("Gcenter error. Input file has unsupported file extension but this should have been handled before."),
@@ -196,7 +199,7 @@ pub fn center(
 
     if args.trajectories.is_empty() {
         // trajectory file not provided, center the structure file
-        center_structure_file(system, &args.output, output_type, dimension)?;
+        center_structure_file(system, &args.output, output_type, dimension, args.com)?;
     } else {
         match output_type {
             FileType::XTC => {
@@ -209,6 +212,11 @@ pub fn center(
             }
             _ => panic!("Gcenter error. Output file has unsupported file extension but this should have been handled before."),
         };
+
+        if !args.silent {
+            println!();
+        }
+        
     }
 
     Ok(())

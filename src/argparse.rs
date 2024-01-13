@@ -1,5 +1,5 @@
 // Released under MIT License.
-// Copyright (c) 2023 Ladislav Bartos
+// Copyright (c) 2023-2024 Ladislav Bartos
 
 //! Implementation of a command line argument parser.
 
@@ -66,7 +66,8 @@ If the simulation steps coincide, only the first of these frames is centered and
         long = "reference",
         help = "Group to center",
         default_value = "Protein",
-        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names."
+        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names.",
+        value_parser = validate_reference
     )]
     pub reference: String,
 
@@ -167,6 +168,15 @@ fn validate_trajectory_type(s: &str) -> Result<String, String> {
     match FileType::from_name(s) {
         FileType::XTC | FileType::TRR => Ok(s.to_owned()),
         _ => Err(String::from("unsupported file extension")),
+    }
+}
+
+/// Validate that the GSL query does not contain any unsupported keywords.
+fn validate_reference(s: &str) -> Result<String, String> {
+    if s.contains("molecule with") || s.contains("mol with") {
+        Err(String::from("gcenter does not employ connectivity and therefore does not support GSL keyword `molecule with`"))
+    } else {
+        Ok(s.to_owned())
     }
 }
 

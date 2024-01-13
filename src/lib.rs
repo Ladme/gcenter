@@ -1,5 +1,5 @@
 // Released under MIT License.
-// Copyright (c) 2023 Ladislav Bartos
+// Copyright (c) 2023-2024 Ladislav Bartos
 
 mod argparse;
 mod center;
@@ -7,8 +7,8 @@ mod errors;
 mod reference;
 
 use colored::Colorize;
-use groan_rs::prelude::*;
 use groan_rs::errors::ElementError;
+use groan_rs::prelude::*;
 use std::path::Path;
 
 use argparse::Args;
@@ -69,11 +69,21 @@ fn print_options(args: &Args, system: &System, dim: &Dimension) {
 
     if args.com {
         println!("[METHOD]        {}", "center of mass".bright_blue());
-    } else {
-        println!("[METHOD]        {}", "center of geometry");
     }
 
     println!();
+}
+
+/// Guess elements for target system printing warnings and returning errors.
+fn guess_elements(system: &mut System) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    match system.guess_elements(Elements::default()) {
+        Ok(_) => Ok(()),
+        Err(ElementError::ElementGuessWarning(e)) => {
+            eprintln!("{}", ElementError::ElementGuessWarning(e));
+            Ok(())
+        }
+        Err(e) => Err(Box::from(e)),
+    }
 }
 
 /// Perform the centering.
@@ -138,21 +148,23 @@ pub fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         }
     }
 
-    // select reference atoms
-    reference::create_reference(&mut system, &args)?;
-
     // guess elements and assign masses, if needed
     if args.com {
         if !args.silent {
             println!("{} center of mass calculation requested; will guess elements and assign masses...\n", "note:".purple().bold());
         }
 
-        match system.guess_elements(Elements::default()) {
-            Ok(_) => (),
-            Err(ElementError::ElementGuessWarning(e)) => eprintln!("{}", ElementError::ElementGuessWarning(e)),
-            Err(e) => return Err(Box::from(e)),
+        guess_elements(&mut system)?;
+    } else if args.reference.contains("element") {
+        if !args.silent {
+            println!("{} element keyword detected in query; will guess elements...\n", "note:".purple().bold());
         }
+
+        guess_elements(&mut system)?;
     }
+
+    // select reference atoms
+    reference::create_reference(&mut system, &args)?;
 
     // perform centering
     center::center(&mut system, &args, dim)?;

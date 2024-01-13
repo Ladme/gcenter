@@ -1,5 +1,5 @@
 // Released under MIT License.
-// Copyright (c) 2023 Ladislav Bartos
+// Copyright (c) 2023-2024 Ladislav Bartos
 
 //! Implementation of reference atoms selection.
 
@@ -27,10 +27,11 @@ pub fn create_reference(
                             "{} group '{}' not found. Autodetected {} protein atoms.\n",
                             "warning:".yellow().bold(),
                             "Protein".yellow(),
-                            format!("{}", system.group_get_n_atoms("Reference").unwrap()).bright_blue()
+                            format!("{}", system.group_get_n_atoms("Reference").unwrap())
+                                .bright_blue()
                         );
                     }
-                    
+
                     true
                 }
                 Err(_) => panic!("\ngcenter: Fatal Error. Autodetection failed."),
