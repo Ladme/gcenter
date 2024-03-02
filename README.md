@@ -20,11 +20,6 @@ gcenter -c system.gro -f trajectory.xtc -o output_trajectory.xtc
 ## Options
 
 ```text
-Center your chosen group within a Gromacs trajectory or structure file effortlessly using the Bai & Breen algorithm.
-
-With `gcenter`, you can accurately center atom groups, even when they span multiple molecules that may extend beyond the box boundaries.
-Be aware that `gcenter` exclusively supports orthogonal simulation boxes.
-
 Usage: gcenter [OPTIONS] --structure <STRUCTURE> --output <OUTPUT>
 
 Options:
