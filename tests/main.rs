@@ -41,7 +41,7 @@ mod pass_tests {
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_xyz_com.gro",
+            "tests/test_files/output_xyz_com_guessed.gro",
             output.path().to_str().unwrap()
         ));
     }
@@ -63,7 +63,7 @@ mod pass_tests {
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_z_com.gro",
+            "tests/test_files/output_z_com_guessed.gro",
             output.path().to_str().unwrap()
         ));
     }
@@ -102,7 +102,7 @@ mod pass_tests {
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_xy_com.pdb",
+            "tests/test_files/output_xy_com_guessed.pdb",
             output.path().to_str().unwrap()
         ));
     }
@@ -360,7 +360,28 @@ mod pass_tests {
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_xyz_com.xtc",
+            "tests/test_files/output_xyz_com_guessed.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_aa_nocom() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.gro",
+                &output_arg,
+                "-ftests/test_files/input_aa_peptide.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_aa_nocom.xtc",
             output.path().to_str().unwrap()
         ));
     }
@@ -446,7 +467,7 @@ mod pass_tests {
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_xyz_com.trr",
+            "tests/test_files/output_xyz_com_guessed.trr",
             output.path().to_str().unwrap()
         ));
     }
@@ -642,13 +663,13 @@ mod pass_tests {
                 "-yz",
                 "-b10",
                 "-e80",
-                "-s3"
+                "-s3",
             ])
             .assert()
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_yz_com_begin_end_step.xtc",
+            "tests/test_files/output_yz_com_guessed_begin_end_step.xtc",
             output.path().to_str().unwrap()
         ));
     }
@@ -668,13 +689,13 @@ mod pass_tests {
                 "-x",
                 "-b10",
                 "-e80",
-                "-s2"
+                "-s2",
             ])
             .assert()
             .success();
 
         assert!(file_diff::diff(
-            "tests/test_files/output_x_com_begin_end_step.trr",
+            "tests/test_files/output_x_com_guessed_begin_end_step.trr",
             output.path().to_str().unwrap()
         ));
     }
@@ -980,6 +1001,56 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_xtc_multiple_inputs_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-s3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_multiple_inputs_begin_end_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-s3",
+                "-b400",
+                "-e800",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_xtc_multiple_inputs_end_early() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -1140,29 +1211,6 @@ mod pass_tests {
 
         assert!(file_diff::diff(
             "tests/test_files/output_xyz_begin_end.trr",
-            output.path().to_str().unwrap()
-        ));
-    }
-
-    #[test]
-    fn xyz_xtc_and_trr_multiple_inputs() {
-        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
-        let output_arg = format!("-o{}", output.path().display());
-
-        Command::cargo_bin("gcenter")
-            .unwrap()
-            .args([
-                "-ctests/test_files/input.gro",
-                &output_arg,
-                "-ftests/test_files/input_part1.xtc",
-                "-ftests/test_files/input_part2.trr",
-                "-ftests/test_files/input_part3.xtc",
-            ])
-            .assert()
-            .success();
-
-        assert!(file_diff::diff(
-            "tests/test_files/output_xyz.xtc",
             output.path().to_str().unwrap()
         ));
     }
@@ -1330,13 +1378,464 @@ mod pass_tests {
             .args([
                 "-ctests/test_files/input_aa_peptide.gro",
                 &output_arg,
-                "-relement name carbon nitrogen hydrogen oxygen"
+                "-relement name carbon nitrogen hydrogen oxygen",
             ])
             .assert()
             .success();
 
         assert!(file_diff::diff(
             "tests/test_files/output_xyz_aa_peptide.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_elname_query() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.gro",
+                &output_arg,
+                "-relname carbon nitrogen hydrogen oxygen",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_aa_peptide.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_elsymbol_query() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.gro",
+                &output_arg,
+                "-relsymbol C N H O",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_aa_peptide.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_aa_nocom() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.tpr",
+                &output_arg,
+                "-ftests/test_files/input_aa_peptide.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_aa_nocom.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_cg_nocom() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_aa_com() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.tpr",
+                &output_arg,
+                "-ftests/test_files/input_aa_peptide.xtc",
+                "--com",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_com.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn yz_trr_tpr_cg_com() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+                "--com",
+                "-yz",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_yz_cg_com.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xy_xtc_tpr_aa_nocom_range_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.tpr",
+                &output_arg,
+                "-ftests/test_files/input_aa_peptide.xtc",
+                "-b10",
+                "-e80",
+                "-s4",
+                "-xy",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xy_aa_nocom_rangestep.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_cg_nocom_range_step() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-b400",
+                "-e800",
+                "-s3",
+                "-xyz",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn z_trr_tpr_aa_com_range_step() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.tpr",
+                &output_arg,
+                "-ftests/test_files/input_aa_peptide.trr",
+                "-b10",
+                "-e80",
+                "-s2",
+                "-z",
+                "--com",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_z_aa_com.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xz_xtc_tpr_cg_com_range_step() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+                "-b400",
+                "-e800",
+                "-s3",
+                "-xz",
+                "--com",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xz_cg_com_rangestep.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_cg_nocom_multi() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn yz_trr_tpr_cg_com_multi() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input_part1.trr",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.trr",
+                "--com",
+                "-yz",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_yz_cg_com.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_cg_nocom_range_step_multi() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.xtc",
+                "-ftests/test_files/input_part3.xtc",
+                "-b400",
+                "-e800",
+                "-s3",
+                "-xyz",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_begin_end_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xz_xtc_tpr_cg_com_range_step_multi() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input_part1.trr",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.trr",
+                "-b400",
+                "-e800",
+                "-s3",
+                "-xz",
+                "--com",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xz_cg_com_rangestep.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_trp_molwith() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-rmolwith serial 3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_tpr_aa_element() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.tpr",
+                &output_arg,
+                "-ftests/test_files/input_aa_peptide.xtc",
+                "-relement name carbon nitrogen hydrogen oxygen",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_aa_nocom.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_whole() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "--whole",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_whole.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn y_trr_whole() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.trr",
+                "--whole",
+                "-y",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_y_whole.trr",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xy_xtc_whole_complex() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-ntests/test_files/index.ndx",
+                "-rMembrane",
+                "--whole",
+                "-b400",
+                "-e800",
+                "-s3",
+                "--com",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xy_whole_complex.trr",
             output.path().to_str().unwrap()
         ));
     }
@@ -1629,25 +2128,6 @@ mod fail_tests {
     }
 
     #[test]
-    fn multiple_input_step() {
-        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
-        let output_arg = format!("-o{}", output.path().display());
-
-        Command::cargo_bin("gcenter")
-            .unwrap()
-            .args([
-                "-ctests/test_files/input.gro",
-                &output_arg,
-                "-ftests/test_files/input_part1.xtc",
-                "-ftests/test_files/input_part2.xtc",
-                "-ftests/test_files/input_part3.xtc",
-                "-s3",
-            ])
-            .assert()
-            .failure();
-    }
-
-    #[test]
     fn multiple_inputs_identical() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -1688,9 +2168,75 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", "-rmolecule with serial 17", &output_arg])
+            .args([
+                "-ctests/test_files/input.gro",
+                "-rmolecule with serial 17",
+                &output_arg,
+            ])
             .assert()
             .failure();
     }
-    
+
+    #[test]
+    fn tpr_without_trajectory() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input_aa_peptide.tpr", &output_arg])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn whole_without_tpr() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.gro",
+                &output_arg,
+                "--whole",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn xtc_trr_mixed_inputs() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_part1.xtc",
+                "-ftests/test_files/input_part2.trr",
+                "-ftests/test_files/input_part3.xtc",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn xtc_trp_cg_element() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-relement name carbon",
+            ])
+            .assert()
+            .failure();
+    }
 }
