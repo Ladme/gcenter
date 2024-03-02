@@ -18,7 +18,6 @@ use crate::errors::RunError;
     about,
     long_about = "Center your chosen group within a Gromacs trajectory or structure file effortlessly using the Bai & Breen algorithm.\n
 With `gcenter`, you can accurately center atom groups, even when they span multiple molecules that may extend beyond the box boundaries.
-`gcenter` does not employ connectivity information, so it doesn't require a tpr file as input. 
 Be aware that `gcenter` exclusively supports orthogonal simulation boxes."
 )]
 pub struct Args {
@@ -26,7 +25,8 @@ pub struct Args {
         short = 'c',
         long = "structure",
         help = "Input structure file",
-        long_help = "Path to a gro or pdb file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored.",
+        long_help = "Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored.
+Currently, tpr file can only be used if a trajectory is also provided.",
         value_parser = validate_structure_type,
     )]
     pub structure: String,
@@ -38,6 +38,7 @@ pub struct Args {
         long_help = "Path to xtc or trr file(s) containing the trajectory or trajectories to be manipulated. 
 If not provided, the centering operation will use the structure file itself.
 Multiple files separated by whitespace can be provided. These will be concatenated into one output file.
+All trajectory files must be of the same type (i.e., all must be either xtc or trr files).
 When joining trajectories, the last frame of each trajectory and the first frame of the following trajectory are checked for matching simulation steps. 
 If the simulation steps coincide, only the first of these frames is centered and written to output.",
         num_args = 0..,
@@ -66,8 +67,7 @@ If the simulation steps coincide, only the first of these frames is centered and
         long = "reference",
         help = "Group to center",
         default_value = "Protein",
-        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names.",
-        value_parser = validate_reference
+        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names."
     )]
     pub reference: String,
 
@@ -95,7 +95,7 @@ If the simulation steps coincide, only the first of these frames is centered and
         help = "Write every <STEP>th frame",
         default_value_t = 1,
         requires = "trajectories",
-        long_help = "Center and write only every <STEP>th frame of the trajectory to the output file. This option is only applicable when a SINGLE trajectory file is provided."
+        long_help = "Center and write only every <STEP>th frame of the trajectory to the output file. This option is only applicable when trajectory file(s) is/are provided."
     )]
     pub step: usize,
 
@@ -131,9 +131,19 @@ If the simulation steps coincide, only the first of these frames is centered and
         action,
         help = "Center frames using center of mass",
         default_value_t = false,
-        long_help = "Use center of mass instead of center of geometry when centering the reference group. This requires information about atom masses. If not explicitely provided, the masses are guessed."
+        long_help = "Use center of mass instead of center of geometry when centering the reference group. This requires information about atom masses. 
+If they are not explicitly provided using a tpr file, the masses are guessed."
     )]
     pub com: bool,
+
+    #[arg(
+        long = "whole",
+        action,
+        help = "Keep molecules whole",
+        default_value_t = false,
+        long_help = "Do not wrap all atoms into the simulation box but keep molecules whole. This requires providing a tpr file as an input structure file."
+    )]
+    pub whole: bool,
 
     #[arg(
         long = "silent",
@@ -157,7 +167,7 @@ If the simulation steps coincide, only the first of these frames is centered and
 /// Validate that the structure is gro or pdb file.
 fn validate_structure_type(s: &str) -> Result<String, String> {
     match FileType::from_name(s) {
-        FileType::GRO | FileType::PDB => Ok(s.to_owned()),
+        FileType::GRO | FileType::PDB | FileType::TPR => Ok(s.to_owned()),
         _ => Err(String::from("unsupported file extension")),
     }
 }
@@ -171,15 +181,6 @@ fn validate_trajectory_type(s: &str) -> Result<String, String> {
     }
 }
 
-/// Validate that the GSL query does not contain any unsupported keywords.
-fn validate_reference(s: &str) -> Result<String, String> {
-    if s.contains("molecule with") || s.contains("mol with") {
-        Err(String::from("gcenter does not employ connectivity and therefore does not support GSL keyword `molecule with`"))
-    } else {
-        Ok(s.to_owned())
-    }
-}
-
 /// Perform various sanity checks:
 /// a) Check that the input and output files are not identical.
 /// This protects the user from accidentaly overwriting their data.
@@ -188,6 +189,24 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
     // check that the input structure exists
     if !Path::new(&args.structure).exists() {
         return Err(RunError::InputStructureNotFound(args.structure.to_string()));
+    }
+
+    // check that if a tpr file is used, a trajectory is provided
+    let input_type = FileType::from_name(&args.structure);
+    if let (true, FileType::TPR) = (args.trajectories.is_empty(), input_type) {
+        return Err(RunError::TprWithoutTrajectory(args.structure.clone()));
+    }
+
+    // validate that the GSL query does not contain any unsupported keywords
+    if (args.reference.contains("molecule with") || args.reference.contains("mol with"))
+        && input_type != FileType::TPR
+    {
+        return Err(RunError::UnsupportedQuery(args.reference.to_owned()));
+    }
+
+    // check that `whole` is only used when a tpr file is provided
+    if args.whole && input_type != FileType::TPR {
+        return Err(RunError::WholeRequiresTprFile);
     }
 
     // check for input-output matches
@@ -207,20 +226,24 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
                 return Err(RunError::IOMatch(traj.to_string()));
             }
 
-            // check that no other trajectory file matches this one
             for traj2 in args.trajectories.iter().skip(t + 1) {
+                // check that no other trajectory file matches this one
                 if traj == traj2 {
                     return Err(RunError::IdenticalInputFiles(
                         traj.to_owned(),
                         traj2.to_owned(),
                     ));
                 }
+
+                // check that all the trajectories have the same type
+                if FileType::from_name(traj) != FileType::from_name(traj2) {
+                    return Err(RunError::InconsistentTrajectoryFiles(
+                        traj.to_owned(),
+                        traj2.to_owned(),
+                    ));
+                }
             }
         }
-    }
-
-    if args.step != 1 && args.trajectories.len() > 1 {
-        return Err(RunError::StepJoinUnsupported(args.step));
     }
 
     // check the extension of the output file

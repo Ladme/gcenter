@@ -5,7 +5,7 @@
 
 use colored::Colorize;
 use groan_rs::errors::GroupError;
-use groan_rs::prelude::*;
+use groan_rs::system::System;
 
 use crate::argparse::Args;
 use crate::errors::RunError;

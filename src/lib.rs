@@ -8,7 +8,10 @@ mod reference;
 
 use colored::Colorize;
 use groan_rs::errors::ElementError;
-use groan_rs::prelude::*;
+use groan_rs::files::FileType;
+use groan_rs::structures::dimension::Dimension;
+use groan_rs::structures::element::Elements;
+use groan_rs::system::System;
 use std::path::Path;
 
 use argparse::Args;
@@ -69,6 +72,10 @@ fn print_options(args: &Args, system: &System, dim: &Dimension) {
 
     if args.com {
         println!("[METHOD]        {}", "center of mass".bright_blue());
+    }
+
+    if args.whole {
+        println!("[WHOLE]         {}", "molecules".bright_blue())
     }
 
     println!();
@@ -149,18 +156,27 @@ pub fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     }
 
     // guess elements and assign masses, if needed
-    if args.com {
-        if !args.silent {
-            println!("{} center of mass calculation requested; will guess elements and assign masses...\n", "note:".purple().bold());
-        }
+    let input_file_type = FileType::from_name(&args.structure);
+    if input_file_type != FileType::TPR {
+        if args.com {
+            if !args.silent {
+                println!("{} center of mass calculation requested; will guess elements and assign masses...\n", "note:".purple().bold());
+            }
 
-        guess_elements(&mut system)?;
-    } else if args.reference.contains("element") {
-        if !args.silent {
-            println!("{} element keyword detected in query; will guess elements...\n", "note:".purple().bold());
-        }
+            guess_elements(&mut system)?;
+        } else if args.reference.contains("element")
+            || args.reference.contains("elname")
+            || args.reference.contains("elsymbol")
+        {
+            if !args.silent {
+                println!(
+                    "{} element keyword detected in query; will guess elements...\n",
+                    "note:".purple().bold()
+                );
+            }
 
-        guess_elements(&mut system)?;
+            guess_elements(&mut system)?;
+        }
     }
 
     // select reference atoms

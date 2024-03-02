@@ -15,12 +15,18 @@ pub enum RunError {
     OutputUnsupported(String),
     #[error("{} invalid values '{}' and '{}' for '{}': paths correspond to the same file\n\nFor more information, try '{}'.", "error:".red().bold(), .0.yellow(), .1.yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
     IdenticalInputFiles(String, String),
-    #[error("{} invalid value '{}' for '{}': when multiple input trajectories are provided, <STEP> must be 1\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--step <STEP>".bold(), "--help".bold())]
-    StepJoinUnsupported(usize),
     #[error("{} invalid value '{}' for '{}': input structure file does not exist\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--structure <STRUCTURE>".bold(), "--help".bold())]
     InputStructureNotFound(String),
     #[error("{} invalid value '{}' for '{}': input trajectory file does not exist\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
     InputTrajectoryNotFound(String),
+    #[error("{} invalid value '{}' for '{}': tpr file can only used as input structure file when trajectory is also provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--structure <STRUCTURE>".bold(), "--help".bold())]
+    TprWithoutTrajectory(String),
+    #[error("{} invalid value '{}' for '{}': query contains `molecule with` keyword; this is only supported if a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--reference <REFERENCE>".bold(), "--help".bold())]
+    UnsupportedQuery(String),
+    #[error("{} invalid values '{}' and '{}' for '{}': all trajectory files must have the same file format\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), .1.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
+    InconsistentTrajectoryFiles(String, String),
+    #[error("{} invalid argument '{}': this option is only supported when a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), "--whole".bold(), "--help".bold())]
+    WholeRequiresTprFile,
     #[error("{} reference group '{}' is empty\n", "error:".red().bold(), .0.yellow())]
     EmptyReference(String),
     #[error("{} no protein atoms autodetected\n", "error:".red().bold())]
