@@ -19,7 +19,7 @@ pub enum RunError {
     InputStructureNotFound(String),
     #[error("{} invalid value '{}' for '{}': input trajectory file does not exist\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
     InputTrajectoryNotFound(String),
-    #[error("{} invalid value '{}' for '{}': tpr file can only used as input structure file when trajectory is also provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--structure <STRUCTURE>".bold(), "--help".bold())]
+    #[error("{} invalid value '{}' for '{}': tpr file can only be used as input structure file when trajectory is also provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--structure <STRUCTURE>".bold(), "--help".bold())]
     TprWithoutTrajectory(String),
     #[error("{} invalid value '{}' for '{}': query contains `molecule with` keyword; this is only supported if a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--reference <REFERENCE>".bold(), "--help".bold())]
     UnsupportedQuery(String),
