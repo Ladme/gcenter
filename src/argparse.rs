@@ -25,8 +25,7 @@ pub struct Args {
         short = 'c',
         long = "structure",
         help = "Input structure file",
-        long_help = "Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored.
-Currently, tpr file can only be used if a trajectory is also provided.",
+        long_help = "Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.",
         value_parser = validate_structure_type,
     )]
     pub structure: String,
@@ -191,14 +190,10 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
         return Err(RunError::InputStructureNotFound(args.structure.to_string()));
     }
 
-    // check that if a tpr file is used, a trajectory is provided
     let input_type = FileType::from_name(&args.structure);
-    if let (true, FileType::TPR) = (args.trajectories.is_empty(), input_type) {
-        return Err(RunError::TprWithoutTrajectory(args.structure.clone()));
-    }
 
     // validate that the GSL query does not contain any unsupported keywords
-    if (args.reference.contains("molecule with") || args.reference.contains("mol with"))
+    if (args.reference.contains("molecule with") || args.reference.contains("mol with") || args.reference.contains("molwith"))
         && input_type != FileType::TPR
     {
         return Err(RunError::UnsupportedQuery(args.reference.to_owned()));

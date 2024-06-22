@@ -323,6 +323,74 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_tpr_to_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.tpr", &output_arg])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_tpr.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_tpr_to_gro_molwith() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.tpr", &output_arg, "-rmolwith serial 3"])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_tpr.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xy_tpr_to_gro_whole_molecules() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.tpr", &output_arg, "--whole", "-xy"])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xy_whole_from_tpr.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn z_tpr_to_pdb_membrane() {
+        let output = Builder::new().suffix(".pdb").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.tpr", &output_arg, "-ntests/test_files/index.ndx", "-rMembrane", "-z"])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_z_membrane_from_tpr.pdb",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_xtc() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -2173,18 +2241,6 @@ mod fail_tests {
                 "-rmolecule with serial 17",
                 &output_arg,
             ])
-            .assert()
-            .failure();
-    }
-
-    #[test]
-    fn tpr_without_trajectory() {
-        let output = Builder::new().suffix(".gro").tempfile().unwrap();
-        let output_arg = format!("-o{}", output.path().display());
-
-        Command::cargo_bin("gcenter")
-            .unwrap()
-            .args(["-ctests/test_files/input_aa_peptide.tpr", &output_arg])
             .assert()
             .failure();
     }

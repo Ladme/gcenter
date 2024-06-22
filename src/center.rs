@@ -24,11 +24,16 @@ fn center_structure_file(
     output_type: FileType,
     dimension: Dimension,
     com: bool,
+    whole: bool,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if com {
         system.atoms_center_mass("Reference", dimension)?
     } else {
         system.atoms_center("Reference", dimension)?;
+    }
+
+    if whole {
+        system.make_molecules_whole()?;
     }
 
     match output_type {
@@ -131,7 +136,7 @@ pub fn center(
 
     if args.trajectories.is_empty() {
         // trajectory file not provided, center the structure file
-        center_structure_file(system, &args.output, output_type, dimension, args.com)?;
+        center_structure_file(system, &args.output, output_type, dimension, args.com, args.whole)?;
     } else {
         match output_type {
             FileType::XTC => {

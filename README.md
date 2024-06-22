@@ -24,8 +24,7 @@ Usage: gcenter [OPTIONS] --structure <STRUCTURE> --output <OUTPUT>
 
 Options:
   -c, --structure <STRUCTURE>
-          Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored.
-          Currently, tpr file can only be used if a trajectory is also provided.
+          Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.
 
   -f, --trajectory [<TRAJECTORIES>...]
           Path to xtc or trr file(s) containing the trajectory or trajectories to be manipulated. 
