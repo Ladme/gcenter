@@ -16,6 +16,40 @@ use groan_rs::structures::dimension::Dimension;
 use groan_rs::system::System;
 
 use crate::argparse::Args;
+use crate::errors::RunError;
+
+/// Check that the simulation is valid (defined, non-zero and orthogonal).
+fn check_simulation_box(system: &System) -> Result<(), RunError> {
+    match system.get_box_as_ref() {
+        None => return Err(RunError::BoxNotDefined),
+        Some(x) => {
+            if !x.is_orthogonal() {
+                return Err(RunError::BoxNotOrthogonal);
+            }
+
+            if x.x <= 0.0 || x.y <= 0.0 || x.z <= 0.0 {
+                return Err(RunError::BoxNotValid);
+            }
+        }
+    };
+
+    Ok(())
+}
+
+/// Ignore error returned by `check_simulation_box` and print a warning instead.
+/// Used when centering a trajectory.
+fn simbox_error_to_warning(error: Result<(), RunError>, silent: bool) {
+    if !silent {
+        match error {
+            Ok(_) => (),
+            Err(RunError::BoxNotDefined) => eprintln!("{} input structure file has an undefined simulation box.\n", "warning:".yellow().bold()),
+            Err(RunError::BoxNotValid) => eprintln!("{} input structure file has an invalid simulation box (some dimensions are not positive).\n", "warning:".yellow().bold()),
+            Err(RunError::BoxNotOrthogonal) => eprintln!("{} input structure file has a non-orthogonal simulation box.\n", "warning:".yellow().bold()),
+            Err(_) => panic!("\ngcenter: Fatal Error. Unexpected error type returned when checking the simulation box."),
+        } 
+    } 
+    
+}
 
 /// Center the reference group and write an output gro or pdb file.
 fn center_structure_file(
@@ -26,6 +60,8 @@ fn center_structure_file(
     com: bool,
     whole: bool,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    check_simulation_box(system)?;
+
     if com {
         system.atoms_center_mass("Reference", dimension)?
     } else {
@@ -98,6 +134,8 @@ fn center_trajectories(
     writer: &mut impl TrajWrite,
     dimension: Dimension,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    simbox_error_to_warning(check_simulation_box(system), args.silent);
+
     if args.trajectories.len() == 1 {
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {

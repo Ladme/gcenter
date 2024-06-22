@@ -15,7 +15,6 @@ use groan_rs::system::System;
 use std::path::Path;
 
 use argparse::Args;
-use errors::RunError;
 
 /// Print options specified for the centering. Non-default values are colored in blue.
 fn print_options(args: &Args, system: &System, dim: &Dimension) {
@@ -110,20 +109,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     // read structure file
     let mut system = System::from_file(&args.structure)?;
-
-    // check the simulation is valid (defined, non-zero and orthogonal)
-    match system.get_box_as_ref() {
-        None => return Err(Box::from(RunError::BoxNotDefined)),
-        Some(x) => {
-            if x.is_zero() {
-                return Err(Box::from(RunError::BoxNotValid));
-            }
-
-            if !x.is_orthogonal() {
-                return Err(Box::from(RunError::BoxNotOrthogonal));
-            }
-        }
-    };
 
     // read ndx file
     system.read_ndx_with_default(&args.index, "index.ndx")?;

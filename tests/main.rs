@@ -1331,12 +1331,12 @@ mod pass_tests {
         assert_eq!(backups.len(), 1);
 
         let mut content = String::new();
-        let mut read = File::open(&backups[0].as_ref().unwrap()).unwrap();
+        let mut read = File::open(backups[0].as_ref().unwrap()).unwrap();
         read.read_to_string(&mut content).unwrap();
 
         assert_eq!(content, "Some content to test.");
 
-        fs::remove_file(&backups[0].as_ref().unwrap()).unwrap();
+        fs::remove_file(backups[0].as_ref().unwrap()).unwrap();
         fs::remove_file("tests/test_files/temporary.gro").unwrap();
     }
 
@@ -1907,6 +1907,72 @@ mod pass_tests {
             output.path().to_str().unwrap()
         ));
     }
+
+    #[test]
+    fn xyz_xtc_gro_nonorthogonal() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_nonorthogonal.gro",
+                "-ftests/test_files/input.xtc",
+                &output_arg,
+            ])
+            .assert()
+            .success()
+            .stderr("warning: input structure file has a non-orthogonal simulation box.\n\n");
+                
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_gro_invalid() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_invalid_box.gro",
+                "-ftests/test_files/input.xtc",
+                &output_arg,
+            ])
+            .assert()
+            .success()
+            .stderr("warning: input structure file has an invalid simulation box (some dimensions are not positive).\n\n");
+                
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_gro_undefined() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_no_box.pdb",
+                "-ftests/test_files/input.xtc",
+                &output_arg,
+            ])
+            .assert()
+            .success()
+            .stderr("warning: input structure file has an undefined simulation box.\n\n");
+                
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
 }
 
 #[cfg(test)]
@@ -2088,7 +2154,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_tiny_nonorthogonal.gro",
+                "-ctests/test_files/input_nonorthogonal.gro",
                 &output_arg,
             ])
             .assert()
@@ -2102,7 +2168,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_tiny_invalid.gro", &output_arg])
+            .args(["-ctests/test_files/input_invalid_box.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2114,7 +2180,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_tiny_nobox.pdb", &output_arg])
+            .args(["-ctests/test_files/input_no_box.pdb", &output_arg])
             .assert()
             .failure();
     }
