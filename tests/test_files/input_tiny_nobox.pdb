@@ -1,7 +1,0 @@
-TITLE     Membrane
-MODEL        1
-ATOM      1  BB  ASN     1      59.870  21.370  67.470  1.00  0.00            
-ATOM      2  SC1 ASN     1      60.870  20.730  70.950  1.00  0.00            
-ATOM      3  BB  LEU     2      58.660  19.300  65.500  1.00  0.00                      
-TER
-ENDMDL

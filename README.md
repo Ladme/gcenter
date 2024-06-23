@@ -24,8 +24,7 @@ Usage: gcenter [OPTIONS] --structure <STRUCTURE> --output <OUTPUT>
 
 Options:
   -c, --structure <STRUCTURE>
-          Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file will be ignored.
-          Currently, tpr file can only be used if a trajectory is also provided.
+          Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.
 
   -f, --trajectory [<TRAJECTORIES>...]
           Path to xtc or trr file(s) containing the trajectory or trajectories to be manipulated. 
@@ -44,7 +43,7 @@ Options:
           Name of the output file, which can be in gro, pdb (if no trajectory is provided), xtc, or trr format.
 
   -r, --reference <REFERENCE>
-          Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names.
+          Specify the group to be centered. Define the group using the VMD-like 'groan selection language', which also supports ndx group names.
           
           [default: Protein]
 
@@ -72,6 +71,24 @@ Options:
   -z
           Perform centering operation in the z-dimension. This can be combined with other dimensions. If no dimensions are selected, it defaults to '-xyz'.
 
+      --xref <XREFERENCE>
+          Center the specified selection of atoms along the x dimension. 
+          This option, in conjunction with `yref` and `zref`, allows you to center multiple groups, each along a different dimension. 
+          Define the group using the VMD-like 'groan selection language', which also supports ndx group names. 
+          This selection acts as the reference selection for the x dimension, while the `reference` selection will still be centered in other specified dimensions.
+
+      --yref <YREFERENCE>
+          Center the specified selection of atoms along the y dimension. 
+          This option, in conjunction with `xref` and `zref`, allows you to center multiple groups, each along a different dimension. 
+          Define the group using the VMD-like 'groan selection language', which also supports ndx group names. 
+          This selection acts as the reference selection for the y dimension, while the `reference` selection will still be centered in other specified dimensions.
+
+      --zref <ZREFERENCE>
+          Center the specified selection of atoms along the z dimension. 
+          This option, in conjunction with `xref` and `yref`, allows you to center multiple groups, each along a different dimension. 
+          Define the group using the VMD-like 'groan selection language', which also supports ndx group names. 
+          This selection acts as the reference selection for the z dimension, while the `reference` selection will still be centered in other specified dimensions.
+
       --com
           Use center of mass instead of center of geometry when centering the reference group. This requires information about atom masses. 
           If they are not explicitly provided using a tpr file, the masses are guessed.
@@ -94,6 +111,6 @@ Options:
 
 ## Limitations
 
-Only tested on Linux but should work anywhere.
+Only tested on Linux but should work on any modern OS.
 
 Only supports orthogonal simulation boxes!

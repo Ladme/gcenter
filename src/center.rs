@@ -16,19 +16,61 @@ use groan_rs::structures::dimension::Dimension;
 use groan_rs::system::System;
 
 use crate::argparse::Args;
+use crate::errors::RunError;
+
+/// Check that the simulation is valid (defined, non-zero and orthogonal).
+fn check_simulation_box(system: &System) -> Result<(), RunError> {
+    match system.get_box_as_ref() {
+        None => return Err(RunError::BoxNotDefined),
+        Some(x) => {
+            if !x.is_orthogonal() {
+                return Err(RunError::BoxNotOrthogonal);
+            }
+
+            if x.x <= 0.0 || x.y <= 0.0 || x.z <= 0.0 {
+                return Err(RunError::BoxNotValid);
+            }
+        }
+    };
+
+    Ok(())
+}
+
+/// Ignore error returned by `check_simulation_box` and print a warning instead.
+/// Used when centering a trajectory.
+fn simbox_error_to_warning(error: Result<(), RunError>, silent: bool) {
+    if !silent {
+        match error {
+            Ok(_) => (),
+            Err(RunError::BoxNotDefined) => eprintln!("{} input structure file has an undefined simulation box.\n", "warning:".yellow().bold()),
+            Err(RunError::BoxNotValid) => eprintln!("{} input structure file has an invalid simulation box (some dimensions are not positive).\n", "warning:".yellow().bold()),
+            Err(RunError::BoxNotOrthogonal) => eprintln!("{} input structure file has a non-orthogonal simulation box.\n", "warning:".yellow().bold()),
+            Err(_) => panic!("\ngcenter: Fatal Error. Unexpected error type returned when checking the simulation box."),
+        }
+    }
+}
 
 /// Center the reference group and write an output gro or pdb file.
 fn center_structure_file(
     system: &mut System,
     output: &str,
     output_type: FileType,
-    dimension: Dimension,
+    operations: Vec<(String, Dimension)>,
     com: bool,
+    whole: bool,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    if com {
-        system.atoms_center_mass("Reference", dimension)?
-    } else {
-        system.atoms_center("Reference", dimension)?;
+    check_simulation_box(system)?;
+
+    for (group, dims) in operations.iter() {
+        if com {
+            system.atoms_center_mass(group, *dims)?
+        } else {
+            system.atoms_center(group, *dims)?
+        }
+    }
+
+    if whole {
+        system.make_molecules_whole()?;
     }
 
     match output_type {
@@ -45,7 +87,7 @@ fn center_trajectory<'a, Read>(
     reader: TrajReader<'a, Read>,
     args: &Args,
     writer: &mut impl TrajWrite,
-    dimension: Dimension,
+    operations: Vec<(String, Dimension)>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
 where
     Read: TrajRead<'a> + TrajRangeRead<'a> + TrajStepRead<'a>,
@@ -70,10 +112,12 @@ where
     for frame in reader {
         let frame = frame?;
 
-        if args.com {
-            frame.atoms_center_mass("Reference", dimension)?;
-        } else {
-            frame.atoms_center("Reference", dimension)?;
+        for (group, dims) in operations.iter() {
+            if args.com {
+                frame.atoms_center_mass(group, *dims)?
+            } else {
+                frame.atoms_center(group, *dims)?
+            }
         }
 
         if args.whole {
@@ -91,17 +135,19 @@ fn center_trajectories(
     system: &mut System,
     args: &Args,
     writer: &mut impl TrajWrite,
-    dimension: Dimension,
+    operations: Vec<(String, Dimension)>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    simbox_error_to_warning(check_simulation_box(system), args.silent);
+
     if args.trajectories.len() == 1 {
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
                 let reader = system.xtc_iter(&args.trajectories[0])?;
-                center_trajectory::<XtcReader>(reader, args, writer, dimension)
+                center_trajectory::<XtcReader>(reader, args, writer, operations)
             }
             FileType::TRR => {
                 let reader = system.trr_iter(&args.trajectories[0])?;
-                center_trajectory::<TrrReader>(reader, args, writer, dimension)
+                center_trajectory::<TrrReader>(reader, args, writer, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
         }
@@ -109,11 +155,11 @@ fn center_trajectories(
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
                 let reader = system.xtc_cat_iter(&args.trajectories)?;
-                center_trajectory::<TrajConcatenator<XtcReader>>(reader, args, writer, dimension)
+                center_trajectory::<TrajConcatenator<XtcReader>>(reader, args, writer, operations)
             },
             FileType::TRR => {
                 let reader = system.trr_cat_iter(&args.trajectories)?;
-                center_trajectory::<TrajConcatenator<TrrReader>>(reader, args, writer, dimension)
+                center_trajectory::<TrajConcatenator<TrrReader>>(reader, args, writer, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
         }
@@ -124,23 +170,30 @@ fn center_trajectories(
 pub fn center(
     system: &mut System,
     args: &Args,
-    dimension: Dimension,
+    operations: Vec<(String, Dimension)>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // determine type of the output file
     let output_type = FileType::from_name(&args.output);
 
     if args.trajectories.is_empty() {
         // trajectory file not provided, center the structure file
-        center_structure_file(system, &args.output, output_type, dimension, args.com)?;
+        center_structure_file(
+            system,
+            &args.output,
+            output_type,
+            operations,
+            args.com,
+            args.whole,
+        )?;
     } else {
         match output_type {
             FileType::XTC => {
                 let mut writer = XtcWriter::new(system, &args.output)?;
-                center_trajectories(system, args, &mut writer, dimension)?
+                center_trajectories(system, args, &mut writer, operations)?
             }
             FileType::TRR => {
                 let mut writer = TrrWriter::new(system, &args.output)?;
-                center_trajectories(system, args, &mut writer, dimension)?
+                center_trajectories(system, args, &mut writer, operations)?
             }
             _ => panic!("\ngcenter: Fatal Error. Output file has unsupported file extension but this should have been handled before."),
         };

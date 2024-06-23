@@ -323,6 +323,89 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_tpr_to_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args(["-ctests/test_files/input.tpr", &output_arg])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_tpr.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_tpr_to_gro_molwith() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-rmolwith serial 3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_tpr.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xy_tpr_to_gro_whole_molecules() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "--whole",
+                "-xy",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xy_whole_from_tpr.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn z_tpr_to_pdb_membrane() {
+        let output = Builder::new().suffix(".pdb").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ntests/test_files/index.ndx",
+                "-rMembrane",
+                "-z",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_z_membrane_from_tpr.pdb",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_xtc() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -1263,12 +1346,12 @@ mod pass_tests {
         assert_eq!(backups.len(), 1);
 
         let mut content = String::new();
-        let mut read = File::open(&backups[0].as_ref().unwrap()).unwrap();
+        let mut read = File::open(backups[0].as_ref().unwrap()).unwrap();
         read.read_to_string(&mut content).unwrap();
 
         assert_eq!(content, "Some content to test.");
 
-        fs::remove_file(&backups[0].as_ref().unwrap()).unwrap();
+        fs::remove_file(backups[0].as_ref().unwrap()).unwrap();
         fs::remove_file("tests/test_files/temporary.gro").unwrap();
     }
 
@@ -1421,6 +1504,29 @@ mod pass_tests {
                 "-ctests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-relsymbol C N H O",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_aa_peptide.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_element_queries_individual() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_aa_peptide.gro",
+                &output_arg,
+                "--xref=elname carbon nitrogen hydrogen oxygen",
+                "--yref=elsymbol C N H O",
+                "--zref=element symbol C N H O",
             ])
             .assert()
             .success();
@@ -1839,6 +1945,384 @@ mod pass_tests {
             output.path().to_str().unwrap()
         ));
     }
+
+    #[test]
+    fn xyz_xtc_gro_nonorthogonal() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_nonorthogonal.gro",
+                "-ftests/test_files/input.xtc",
+                &output_arg,
+            ])
+            .assert()
+            .success()
+            .stderr("warning: input structure file has a non-orthogonal simulation box.\n\n");
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_gro_invalid() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_invalid_box.gro",
+                "-ftests/test_files/input.xtc",
+                &output_arg,
+            ])
+            .assert()
+            .success()
+            .stderr("warning: input structure file has an invalid simulation box (some dimensions are not positive).\n\n");
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_xtc_gro_undefined() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_no_box.pdb",
+                "-ftests/test_files/input.xtc",
+                &output_arg,
+            ])
+            .assert()
+            .success()
+            .stderr("warning: input structure file has an undefined simulation box.\n\n");
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyzref_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--xref=Protein",
+                "--yref=@membrane",
+                "--zref=@water",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyzref.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyzref_some_same_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--xref=Protein",
+                "--yref=resid 1 to 21",
+                "--zref=@water",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xzref_protein_y.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyzref_all_same_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index.ndx",
+                "--xref=Protein",
+                "--yref=resid 1 to 21",
+                "--zref=@protein",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyzref_pdb() {
+        let output = Builder::new().suffix(".pdb").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.pdb",
+                "--xref=Protein",
+                "--yref=@membrane",
+                "--zref=@water",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyzref.pdb",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyzref_xtc() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                "-ftests/test_files/input.xtc",
+                "--xref=Protein",
+                "--yref=@membrane",
+                "--zref=@water",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyzref.xtc",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyzref_all_same_xtc() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index.ndx",
+                "-ftests/test_files/input.xtc",
+                "--xref=Protein",
+                "--yref=resid 1 to 21",
+                "--zref=@protein",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz.xtc",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyzref_trr() {
+        let output = Builder::new().suffix(".trr").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.pdb",
+                "-ftests/test_files/input.trr",
+                "--xref=Protein",
+                "--yref=@membrane",
+                "--zref=@water",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyzref.trr",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyref_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--xref=Protein",
+                "--yref=@membrane",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyref.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xzref_protein_y_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--xref=Protein",
+                "--zref=resname W",
+                "-y",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xzref_protein_y.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn yref_protein_xz_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--yref=Membrane",
+                "-ntests/test_files/index.ndx",
+                "-xyz",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_yref_protein_xz.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xyref_same_water_z_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index.ndx",
+                "--xref=Protein",
+                "--yref=@protein",
+                "-r@water",
+                "-yz",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xzref_protein_y.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xref_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "-ntests/test_files/index.ndx",
+                "--xref=serial <= 42",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_x.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xtc_whole_complex_with_multiple_references() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.tpr",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+                "-ntests/test_files/index.ndx",
+                "--xref=@water",
+                "--yref=molecule with serial 3",
+                "-z",
+                "--reference=W",
+                "--whole",
+                "-b400",
+                "-e800",
+                "-s3",
+                "--com",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/complex_with_multiple_references.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
 }
 
 #[cfg(test)]
@@ -2019,10 +2503,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args([
-                "-ctests/test_files/input_tiny_nonorthogonal.gro",
-                &output_arg,
-            ])
+            .args(["-ctests/test_files/input_nonorthogonal.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2034,7 +2515,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_tiny_invalid.gro", &output_arg])
+            .args(["-ctests/test_files/input_invalid_box.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2046,7 +2527,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_tiny_nobox.pdb", &output_arg])
+            .args(["-ctests/test_files/input_no_box.pdb", &output_arg])
             .assert()
             .failure();
     }
@@ -2178,13 +2659,49 @@ mod fail_tests {
     }
 
     #[test]
-    fn tpr_without_trajectory() {
+    fn molwith_unsupported_xref() {
         let output = Builder::new().suffix(".gro").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_aa_peptide.tpr", &output_arg])
+            .args([
+                "-ctests/test_files/input.gro",
+                "--xref=molecule with serial 17",
+                &output_arg,
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn molwith_unsupported_yref() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--yref=molecule with serial 17",
+                &output_arg,
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn molwith_unsupported_zref() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                "--zref=molecule with serial 17",
+                &output_arg,
+            ])
             .assert()
             .failure();
     }
