@@ -358,9 +358,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "groan_rs"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ad24915c46a3eaa27b3b086ee16dc5734516e23ea77ac81b98f0f0e23b139ac"
+checksum = "784bb898beb2f76a02619f4a498390cf000d55cfe4dac4abf180e1989fd02c1f"
 dependencies = [
  "cc",
  "colored",

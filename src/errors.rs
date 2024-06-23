@@ -19,8 +19,8 @@ pub enum RunError {
     InputStructureNotFound(String),
     #[error("{} invalid value '{}' for '{}': input trajectory file does not exist\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
     InputTrajectoryNotFound(String),
-    #[error("{} invalid value '{}' for '{}': query contains `molecule with` keyword; this is only supported if a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--reference <REFERENCE>".bold(), "--help".bold())]
-    UnsupportedQuery(String),
+    #[error("{} invalid value '{}' for '{}': query contains `molecule with` keyword; this is only supported if a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), .1.bold(), "--help".bold())]
+    UnsupportedQuery(String, String),
     #[error("{} invalid values '{}' and '{}' for '{}': all trajectory files must have the same file format\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), .1.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
     InconsistentTrajectoryFiles(String, String),
     #[error("{} invalid argument '{}': this option is only supported when a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), "--whole".bold(), "--help".bold())]

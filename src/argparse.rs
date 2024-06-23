@@ -66,7 +66,7 @@ If the simulation steps coincide, only the first of these frames is centered and
         long = "reference",
         help = "Group to center",
         default_value = "Protein",
-        long_help = "Specify the group to be centered. Use VMD-like 'groan selection language' to define the group. This language also supports ndx group names."
+        long_help = "Specify the group to be centered. Define the group using the VMD-like 'groan selection language', which also supports ndx group names."
     )]
     pub reference: String,
 
@@ -126,9 +126,39 @@ If the simulation steps coincide, only the first of these frames is centered and
     pub zdimension: bool,
 
     #[arg(
+        long = "xref",
+        help = "Group to center in the x dimension",
+        long_help = "Center the specified selection of atoms along the x dimension. 
+This option, in conjunction with `yref` and `zref`, allows you to center multiple groups, each along a different dimension. 
+Define the group using the VMD-like 'groan selection language', which also supports ndx group names. 
+This selection acts as the reference selection for the x dimension, while the `reference` selection will still be centered in other specified dimensions."
+    )]
+    pub xreference: Option<String>,
+
+    #[arg(
+        long = "yref",
+        help = "Group to center in the y dimension",
+        long_help = "Center the specified selection of atoms along the y dimension. 
+This option, in conjunction with `xref` and `zref`, allows you to center multiple groups, each along a different dimension. 
+Define the group using the VMD-like 'groan selection language', which also supports ndx group names. 
+This selection acts as the reference selection for the y dimension, while the `reference` selection will still be centered in other specified dimensions."
+    )]
+    pub yreference: Option<String>,
+
+    #[arg(
+        long = "zref",
+        help = "Group to center in the z dimension",
+        long_help = "Center the specified selection of atoms along the z dimension. 
+This option, in conjunction with `xref` and `yref`, allows you to center multiple groups, each along a different dimension. 
+Define the group using the VMD-like 'groan selection language', which also supports ndx group names. 
+This selection acts as the reference selection for the z dimension, while the `reference` selection will still be centered in other specified dimensions."
+    )]
+    pub zreference: Option<String>,
+
+    #[arg(
         long = "com",
         action,
-        help = "Center frames using center of mass",
+        help = "Use center of mass",
         default_value_t = false,
         long_help = "Use center of mass instead of center of geometry when centering the reference group. This requires information about atom masses. 
 If they are not explicitly provided using a tpr file, the masses are guessed."
@@ -180,6 +210,45 @@ fn validate_trajectory_type(s: &str) -> Result<String, String> {
     }
 }
 
+/// Returns true if a query contains "molecule with" keyword or its alternatives.
+fn query_contains_molecule_with(query: &str) -> bool {
+    query.contains("molecule with") || query.contains("mol with") || query.contains("molwith")
+}
+
+/// Checks that the GSL queries used for references do not contain any unsupported keywords.
+fn validate_queries(args: &Args, input_type: FileType) -> Result<(), RunError> {
+    if input_type == FileType::TPR {
+        return Ok(());
+    }
+
+    for (reference, name) in [&args.xreference, &args.yreference, &args.zreference]
+        .into_iter()
+        .zip(
+            [
+                "--xref <XREFERENCE>",
+                "--yref <YREFERENCE>",
+                "--zref <ZREFERENCE>",
+            ]
+            .into_iter(),
+        )
+    {
+        if let Some(x) = reference {
+            if query_contains_molecule_with(x) {
+                return Err(RunError::UnsupportedQuery(x.to_owned(), name.to_owned()));
+            }
+        }
+    }
+
+    if query_contains_molecule_with(&args.reference) {
+        return Err(RunError::UnsupportedQuery(
+            args.reference.to_owned(),
+            "--reference <REFERENCE>".to_owned(),
+        ));
+    }
+
+    Ok(())
+}
+
 /// Perform various sanity checks:
 /// a) Check that the input and output files are not identical.
 /// This protects the user from accidentaly overwriting their data.
@@ -192,12 +261,8 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
 
     let input_type = FileType::from_name(&args.structure);
 
-    // validate that the GSL query does not contain any unsupported keywords
-    if (args.reference.contains("molecule with") || args.reference.contains("mol with") || args.reference.contains("molwith"))
-        && input_type != FileType::TPR
-    {
-        return Err(RunError::UnsupportedQuery(args.reference.to_owned()));
-    }
+    // validate that the GSL queries do not contain any unsupported keywords
+    validate_queries(args, input_type)?;
 
     // check that `whole` is only used when a tpr file is provided
     if args.whole && input_type != FileType::TPR {
