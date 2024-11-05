@@ -6,11 +6,11 @@
 use colored::Colorize;
 use groan_rs::files::FileType;
 use groan_rs::io::traj_cat::TrajConcatenator;
-use groan_rs::io::traj_io::{
-    FrameDataTime, TrajMasterRead, TrajRangeRead, TrajRead, TrajReader, TrajStepRead, TrajWrite,
+use groan_rs::io::traj_read::{
+    FrameDataTime, TrajMasterRead, TrajRangeRead, TrajRead, TrajReader, TrajStepRead,
 };
-use groan_rs::io::trr_io::{TrrReader, TrrWriter};
-use groan_rs::io::xtc_io::{XtcReader, XtcWriter};
+use groan_rs::io::trr_io::TrrReader;
+use groan_rs::io::xtc_io::XtcReader;
 use groan_rs::progress::ProgressPrinter;
 use groan_rs::structures::dimension::Dimension;
 use groan_rs::system::System;
@@ -20,7 +20,7 @@ use crate::errors::RunError;
 
 /// Check that the simulation is valid (defined, non-zero and orthogonal).
 fn check_simulation_box(system: &System) -> Result<(), RunError> {
-    match system.get_box_as_ref() {
+    match system.get_box() {
         None => return Err(RunError::BoxNotDefined),
         Some(x) => {
             if !x.is_orthogonal() {
@@ -86,7 +86,6 @@ fn center_structure_file(
 fn center_trajectory<'a, Read>(
     reader: TrajReader<'a, Read>,
     args: &Args,
-    writer: &mut impl TrajWrite,
     operations: Vec<(String, Dimension)>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
 where
@@ -124,7 +123,7 @@ where
             frame.make_molecules_whole()?;
         }
 
-        writer.write_frame()?;
+        frame.traj_write_frame()?;
     }
 
     Ok(())
@@ -134,7 +133,6 @@ where
 fn center_trajectories(
     system: &mut System,
     args: &Args,
-    writer: &mut impl TrajWrite,
     operations: Vec<(String, Dimension)>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     simbox_error_to_warning(check_simulation_box(system), args.silent);
@@ -143,11 +141,11 @@ fn center_trajectories(
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
                 let reader = system.xtc_iter(&args.trajectories[0])?;
-                center_trajectory::<XtcReader>(reader, args, writer, operations)
+                center_trajectory::<XtcReader>(reader, args, operations)
             }
             FileType::TRR => {
                 let reader = system.trr_iter(&args.trajectories[0])?;
-                center_trajectory::<TrrReader>(reader, args, writer, operations)
+                center_trajectory::<TrrReader>(reader, args, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
         }
@@ -155,11 +153,11 @@ fn center_trajectories(
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
                 let reader = system.xtc_cat_iter(&args.trajectories)?;
-                center_trajectory::<TrajConcatenator<XtcReader>>(reader, args, writer, operations)
+                center_trajectory::<TrajConcatenator<XtcReader>>(reader, args, operations)
             },
             FileType::TRR => {
                 let reader = system.trr_cat_iter(&args.trajectories)?;
-                center_trajectory::<TrajConcatenator<TrrReader>>(reader, args, writer, operations)
+                center_trajectory::<TrajConcatenator<TrrReader>>(reader, args, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
         }
@@ -186,17 +184,9 @@ pub fn center(
             args.whole,
         )?;
     } else {
-        match output_type {
-            FileType::XTC => {
-                let mut writer = XtcWriter::new(system, &args.output)?;
-                center_trajectories(system, args, &mut writer, operations)?
-            }
-            FileType::TRR => {
-                let mut writer = TrrWriter::new(system, &args.output)?;
-                center_trajectories(system, args, &mut writer, operations)?
-            }
-            _ => panic!("\ngcenter: Fatal Error. Output file has unsupported file extension but this should have been handled before."),
-        };
+        // attach trajectory writer
+        system.traj_writer_auto_init(&args.output)?;
+        center_trajectories(system, args, operations)?;
 
         if !args.silent {
             println!("\n");
