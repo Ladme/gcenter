@@ -24,10 +24,10 @@ Usage: gcenter [OPTIONS] --structure <STRUCTURE> --output <OUTPUT>
 
 Options:
   -c, --structure <STRUCTURE>
-          Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.
+          Path to a gro, pdb, pqr, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.
 
   -f, --trajectory [<TRAJECTORIES>...]
-          Path to xtc or trr file(s) containing the trajectory or trajectories to be manipulated. 
+          Path to xtc or trr file(s) or to a single gro file containing the trajectory (or trajectories) to be manipulated. 
           If not provided, the centering operation will use the structure file itself.
           Multiple files separated by whitespace can be provided. These will be concatenated into one output file.
           All trajectory files must be of the same type (i.e., all must be either xtc or trr files).
@@ -40,7 +40,8 @@ Options:
           [default: index.ndx]
 
   -o, --output <OUTPUT>
-          Name of the output file, which can be in gro, pdb (if no trajectory is provided), xtc, or trr format.
+          Name of the output file, which can be in gro, pdb, or pqr format if no trajectory is provided, 
+          or in xtc, trr, or gro format if a trajectory is provided.
 
   -r, --reference <REFERENCE>
           Specify the group to be centered. Define the group using the VMD-like 'groan selection language', which also supports ndx group names.
@@ -48,17 +49,22 @@ Options:
           [default: Protein]
 
   -b, --begin <START_TIME>
-          Time of the first frame to read from the trajectory (in ps). All previous frames will be skipped. This option is only applicable when trajectory file(s) is/are provided.
+          Time of the first frame to read from the trajectory (in ps). All previous frames will be skipped.
+          This option is only applicable when trajectory file(s) is/are provided.
+          This option cannot be used when the trajectory is a gro file since gro files are not guaranteed to contain simulation time information.
           
           [default: 0.0]
 
   -e, --end <END_TIME>
-          Time of the last frame to read from the trajectory (in ps). All following frames will be skipped. This option is only applicable when trajectory file(s) is/are provided.
+          Time of the last frame to read from the trajectory (in ps). All following frames will be skipped.
+          This option is only applicable when trajectory file(s) is/are provided.
+          This option cannot be used when the trajectory is a gro file since gro files are not guaranteed to contain simulation time information.
           
           [default: NaN]
 
   -s, --step <STEP>
-          Center and write only every <STEP>th frame of the trajectory to the output file. This option is only applicable when trajectory file(s) is/are provided.
+          Center and write only every <STEP>th frame of the trajectory to the output file.
+          This option is only applicable when trajectory file(s) is/are provided.
           
           [default: 1]
 

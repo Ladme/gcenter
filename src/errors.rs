@@ -23,6 +23,12 @@ pub enum RunError {
     UnsupportedQuery(String, String),
     #[error("{} invalid values '{}' and '{}' for '{}': all trajectory files must have the same file format\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), .1.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
     InconsistentTrajectoryFiles(String, String),
+    #[error("{} invalid value '{}' for '{}': concatenation of gro trajectories is not supported\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--trajectory [<TRAJECTORIES>...]".bold(), "--help".bold())]
+    OnlyOneGroTrajectory(String),
+    #[error("{} invalid value '{}' for '{}': gro trajectories are not guaranteed to contain information about simulation time, therefore `start_time` cannot be specified\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--begin <START_TIME>".bold(), "--help".bold())]
+    BeginNotSupportedForGro(String),
+    #[error("{} invalid value '{}' for '{}': gro trajectories are not guaranteed to contain information about simulation time, therefore `end_time` cannot be specified\n\nFor more information, try '{}'.", "error:".red().bold(), .0.to_string().yellow(), "--end <END_TIME>".bold(), "--help".bold())]
+    EndNotSupportedForGro(String),
     #[error("{} invalid argument '{}': this option is only supported when a tpr file is provided\n\nFor more information, try '{}'.", "error:".red().bold(), "--whole".bold(), "--help".bold())]
     WholeRequiresTprFile,
     #[error("{} reference group '{}' is empty\n", "error:".red().bold(), .0.yellow())]
