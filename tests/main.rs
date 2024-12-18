@@ -427,6 +427,90 @@ mod pass_tests {
     }
 
     #[test]
+    fn xyz_xtc_to_gro_traj() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.xtc",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_traj_xyz.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_traj_to_gro() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_traj.gro",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_traj_xyz.gro",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_traj_to_xtc() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_traj.gro",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_gro.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_traj_to_xtc_same_structure() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input_traj.gro",
+                &output_arg,
+                "-ftests/test_files/input_traj.gro",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_from_gro.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
     fn xyz_xtc_com() {
         let output = Builder::new().suffix(".xtc").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
@@ -890,6 +974,28 @@ mod pass_tests {
 
         assert!(file_diff::diff(
             "tests/test_files/output_xyz_step.xtc",
+            output.path().to_str().unwrap()
+        ));
+    }
+
+    #[test]
+    fn xyz_gro_traj_step_to_xtc() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input_traj.gro",
+                "-s3",
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/output_xyz_step_from_gro.xtc",
             output.path().to_str().unwrap()
         ));
     }
@@ -2603,7 +2709,7 @@ mod fail_tests {
 
     #[test]
     fn unsupported_extension_xtc() {
-        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output = Builder::new().suffix(".pdb").tempfile().unwrap();
         let output_arg = format!("-o{}", output.path().display());
 
         Command::cargo_bin("gcenter")
@@ -2797,6 +2903,58 @@ mod fail_tests {
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-relement name carbon",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn gro_traj_multiple_inputs() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/output_z.gro",
+                "-ftests/test_files/output_yz.gro",
+                "-ftests/test_files/output_xz.gro",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn gro_traj_begin() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.gro",
+                "-b100",
+            ])
+            .assert()
+            .failure();
+    }
+
+    #[test]
+    fn gro_traj_end() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/input.gro",
+                &output_arg,
+                "-ftests/test_files/input.gro",
+                "-e1000",
             ])
             .assert()
             .failure();

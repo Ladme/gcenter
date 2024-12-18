@@ -25,7 +25,7 @@ pub struct Args {
         short = 'c',
         long = "structure",
         help = "Input structure file",
-        long_help = "Path to a gro, pdb, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.",
+        long_help = "Path to a gro, pdb, pqr, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.",
         value_parser = validate_structure_type,
     )]
     pub structure: String,
@@ -34,7 +34,7 @@ pub struct Args {
         short = 'f',
         long = "trajectory",
         help = "Input trajectory file(s)",
-        long_help = "Path to xtc or trr file(s) containing the trajectory or trajectories to be manipulated. 
+        long_help = "Path to xtc or trr file(s) or to a single gro file containing the trajectory (or trajectories) to be manipulated. 
 If not provided, the centering operation will use the structure file itself.
 Multiple files separated by whitespace can be provided. These will be concatenated into one output file.
 All trajectory files must be of the same type (i.e., all must be either xtc or trr files).
@@ -57,7 +57,8 @@ If the simulation steps coincide, only the first of these frames is centered and
         short = 'o',
         long = "output",
         help = "Output file name",
-        long_help = "Name of the output file, which can be in gro, pdb (if no trajectory is provided), xtc, or trr format."
+        long_help = "Name of the output file, which can be in gro, pdb, or pqr format if no trajectory is provided, 
+or in xtc, trr, or gro format if a trajectory is provided."
     )]
     pub output: String,
 
@@ -75,7 +76,9 @@ If the simulation steps coincide, only the first of these frames is centered and
         long = "begin",
         help = "Time of the first frame to read (in ps) [default: 0.0]",
         requires = "trajectories",
-        long_help = "Time of the first frame to read from the trajectory (in ps). All previous frames will be skipped. This option is only applicable when trajectory file(s) is/are provided.\n\n[default: 0.0]"
+        long_help = "Time of the first frame to read from the trajectory (in ps). All previous frames will be skipped.
+This option is only applicable when trajectory file(s) is/are provided.
+This option cannot be used when the trajectory is a gro file since gro files are not guaranteed to contain simulation time information.\n\n[default: 0.0]"
     )]
     pub start_time: Option<f32>,
 
@@ -84,7 +87,9 @@ If the simulation steps coincide, only the first of these frames is centered and
         long = "end",
         help = "Time of the last frame to read (in ps) [default: NaN]",
         requires = "trajectories",
-        long_help = "Time of the last frame to read from the trajectory (in ps). All following frames will be skipped. This option is only applicable when trajectory file(s) is/are provided.\n\n[default: NaN]"
+        long_help = "Time of the last frame to read from the trajectory (in ps). All following frames will be skipped.
+This option is only applicable when trajectory file(s) is/are provided.
+This option cannot be used when the trajectory is a gro file since gro files are not guaranteed to contain simulation time information.\n\n[default: NaN]"
     )]
     pub end_time: Option<f32>,
 
@@ -94,7 +99,8 @@ If the simulation steps coincide, only the first of these frames is centered and
         help = "Write every <STEP>th frame",
         default_value_t = 1,
         requires = "trajectories",
-        long_help = "Center and write only every <STEP>th frame of the trajectory to the output file. This option is only applicable when trajectory file(s) is/are provided."
+        long_help = "Center and write only every <STEP>th frame of the trajectory to the output file.
+This option is only applicable when trajectory file(s) is/are provided."
     )]
     pub step: usize,
 
@@ -196,7 +202,7 @@ If they are not explicitly provided using a tpr file, the masses are guessed."
 /// Validate that the structure is gro or pdb file.
 fn validate_structure_type(s: &str) -> Result<String, String> {
     match FileType::from_name(s) {
-        FileType::GRO | FileType::PDB | FileType::TPR => Ok(s.to_owned()),
+        FileType::GRO | FileType::PDB | FileType::TPR | FileType::PQR => Ok(s.to_owned()),
         _ => Err(String::from("unsupported file extension")),
     }
 }
@@ -205,7 +211,7 @@ fn validate_structure_type(s: &str) -> Result<String, String> {
 /// Validate that no trajectory is provided multiple times.
 fn validate_trajectory_type(s: &str) -> Result<String, String> {
     match FileType::from_name(s) {
-        FileType::XTC | FileType::TRR => Ok(s.to_owned()),
+        FileType::XTC | FileType::TRR | FileType::GRO => Ok(s.to_owned()),
         _ => Err(String::from("unsupported file extension")),
     }
 }
@@ -286,6 +292,11 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
                 return Err(RunError::IOMatch(traj.to_string()));
             }
 
+            // check that if there is multiple trajectories, none are GRO files
+            if t > 0 && FileType::from_name(traj) == FileType::GRO {
+                return Err(RunError::OnlyOneGroTrajectory(traj.to_owned()));
+            }
+
             for traj2 in args.trajectories.iter().skip(t + 1) {
                 // check that no other trajectory file matches this one
                 if traj == traj2 {
@@ -306,12 +317,31 @@ fn sanity_check_inputs(args: &Args) -> Result<(), RunError> {
         }
     }
 
+    // check that if `start_time` or `end_time` is provided, trajectory is not a gro file
+    if let Some(file) = args.trajectories.first() {
+        let file_type = FileType::from_name(file);
+
+        if file_type == FileType::GRO {
+            if args.start_time.is_some() {
+                return Err(RunError::BeginNotSupportedForGro(
+                    args.start_time.unwrap().to_string(),
+                ));
+            }
+
+            if args.end_time.is_some() {
+                return Err(RunError::EndNotSupportedForGro(
+                    args.end_time.unwrap().to_string(),
+                ));
+            }
+        }
+    }
+
     // check the extension of the output file
     let output_type = FileType::from_name(&args.output);
     match (args.trajectories.is_empty(), output_type) {
-        (true, FileType::GRO | FileType::PDB) => Ok(()),
+        (true, FileType::GRO | FileType::PDB | FileType::PQR) => Ok(()),
         (true, _) => Err(RunError::OutputUnsupported(args.output.clone())),
-        (false, FileType::XTC | FileType::TRR) => Ok(()),
+        (false, FileType::XTC | FileType::TRR | FileType::GRO) => Ok(()),
         (false, _) => Err(RunError::OutputUnsupported(args.output.clone())),
     }
 }

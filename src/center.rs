@@ -4,13 +4,12 @@
 //! Implementation of the centering procedure.
 
 use colored::Colorize;
+use groan_rs::errors::ReadTrajError;
 use groan_rs::files::FileType;
-use groan_rs::io::traj_cat::TrajConcatenator;
 use groan_rs::io::traj_read::{
     FrameDataTime, TrajMasterRead, TrajRangeRead, TrajRead, TrajReader, TrajStepRead,
 };
-use groan_rs::io::trr_io::TrrReader;
-use groan_rs::io::xtc_io::XtcReader;
+use groan_rs::prelude::{TrajRangeStepReader, TrajStepReader};
 use groan_rs::progress::ProgressPrinter;
 use groan_rs::structures::dimension::Dimension;
 use groan_rs::system::System;
@@ -76,30 +75,49 @@ fn center_structure_file(
     match output_type {
         FileType::GRO => system.write_gro(output, system.has_velocities())?,
         FileType::PDB => system.write_pdb(output, system.has_bonds())?,
+        FileType::PQR => system.write_pqr(output, None)?,
         _ => panic!("\ngcenter: Fatal Error. Output file has unsupported file extension but this should have been handled before."),
     }
 
     Ok(())
 }
 
-/// Center a trajectory.
-fn center_trajectory<'a, Read>(
+/// Select range to read (with steps).
+fn read_range_step<'a, Read>(
     reader: TrajReader<'a, Read>,
     args: &Args,
-    operations: Vec<(String, Dimension)>,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
+) -> Result<TrajRangeStepReader<'a, Read>, ReadTrajError>
 where
-    Read: TrajRead<'a> + TrajRangeRead<'a> + TrajStepRead<'a>,
+    Read: TrajRead<'a> + TrajStepRead<'a> + TrajRangeRead<'a>,
     <Read as TrajRead<'a>>::FrameData: FrameDataTime,
 {
     let reader = match (args.start_time, args.end_time) {
-        (None, None) => reader.with_range(0.0, f32::MAX)?,
-        (Some(start), None) => reader.with_range(start, f32::MAX)?,
-        (None, Some(end)) => reader.with_range(0.0, end)?,
-        (Some(start), Some(end)) => reader.with_range(start, end)?,
-    };
-    let mut reader = reader.with_step(args.step)?;
+        (None, None) => reader.with_range(0.0, f32::MAX),
+        (Some(start), None) => reader.with_range(start, f32::MAX),
+        (None, Some(end)) => reader.with_range(0.0, end),
+        (Some(start), Some(end)) => reader.with_range(start, end),
+    }?;
 
+    reader.with_step(args.step)
+}
+
+/// Specify step of the trajectory reading.
+fn read_step<'a, Read>(
+    reader: TrajReader<'a, Read>,
+    args: &Args,
+) -> Result<TrajStepReader<'a, Read>, ReadTrajError>
+where
+    Read: TrajRead<'a> + TrajStepRead<'a>,
+{
+    reader.with_step(args.step)
+}
+
+/// Center a trajectory.
+fn center_trajectory<'a>(
+    mut reader: impl TrajMasterRead<'a>,
+    args: &Args,
+    operations: Vec<(String, Dimension)>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if !args.silent {
         reader = reader.print_progress(
             ProgressPrinter::new()
@@ -140,24 +158,28 @@ fn center_trajectories(
     if args.trajectories.len() == 1 {
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
-                let reader = system.xtc_iter(&args.trajectories[0])?;
-                center_trajectory::<XtcReader>(reader, args, operations)
+                let reader = read_range_step(system.xtc_iter(&args.trajectories[0])?, &args)?;
+                center_trajectory(reader, args, operations)
             }
             FileType::TRR => {
-                let reader = system.trr_iter(&args.trajectories[0])?;
-                center_trajectory::<TrrReader>(reader, args, operations)
+                let reader = read_range_step(system.trr_iter(&args.trajectories[0])?, &args)?;
+                center_trajectory(reader, args, operations)
+            }
+            FileType::GRO => {
+                let reader = read_step(system.gro_iter(&args.trajectories[0])?, &args)?;
+                center_trajectory(reader, args, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
         }
     } else {
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
-                let reader = system.xtc_cat_iter(&args.trajectories)?;
-                center_trajectory::<TrajConcatenator<XtcReader>>(reader, args, operations)
+                let reader = read_range_step(system.xtc_cat_iter(&args.trajectories)?, &args)?;
+                center_trajectory(reader, args, operations)
             },
             FileType::TRR => {
-                let reader = system.trr_cat_iter(&args.trajectories)?;
-                center_trajectory::<TrajConcatenator<TrrReader>>(reader, args, operations)
+                let reader = read_range_step(system.trr_cat_iter(&args.trajectories)?, &args)?;
+                center_trajectory(reader, args, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
         }
