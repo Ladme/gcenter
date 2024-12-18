@@ -15,7 +15,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg])
+            .args(["-stests/test_files/input.gro", &output_arg])
             .assert()
             .success();
 
@@ -33,7 +33,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "--com",
             ])
@@ -54,7 +54,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "--com",
                 "-z",
@@ -75,7 +75,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg])
+            .args(["-stests/test_files/input.gro", &output_arg])
             .assert()
             .success();
 
@@ -93,7 +93,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "--com",
                 "-xy",
@@ -114,7 +114,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.pdb", &output_arg])
+            .args(["-stests/test_files/input.pdb", &output_arg])
             .assert()
             .success();
 
@@ -131,7 +131,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.pdb", &output_arg])
+            .args(["-stests/test_files/input.pdb", &output_arg])
             .assert()
             .success();
 
@@ -148,7 +148,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_no_velocities.gro", &output_arg])
+            .args(["-stests/test_files/input_no_velocities.gro", &output_arg])
             .assert()
             .success();
 
@@ -165,7 +165,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-xyz"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-xyz"])
             .assert()
             .success();
 
@@ -183,7 +183,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-xyz",
                 "-rProtein",
@@ -205,7 +205,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-xy"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-xy"])
             .assert()
             .success();
 
@@ -222,7 +222,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-xz"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-xz"])
             .assert()
             .success();
 
@@ -239,7 +239,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-yz"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-yz"])
             .assert()
             .success();
 
@@ -256,7 +256,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-x"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-x"])
             .assert()
             .success();
 
@@ -273,7 +273,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-y"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-y"])
             .assert()
             .success();
 
@@ -290,7 +290,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-z"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-z"])
             .assert()
             .success();
 
@@ -308,7 +308,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-rW",
                 "-ntests/test_files/index.ndx",
@@ -329,7 +329,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.tpr", &output_arg])
+            .args(["-stests/test_files/input.tpr", &output_arg])
             .assert()
             .success();
 
@@ -347,7 +347,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-rmolwith serial 3",
             ])
@@ -368,7 +368,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "--whole",
                 "-xy",
@@ -390,7 +390,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ntests/test_files/index.ndx",
                 "-rMembrane",
@@ -412,7 +412,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.pqr", &output_arg])
+            .args(["-stests/test_files/input.pqr", &output_arg])
             .assert()
             .success();
 
@@ -429,7 +429,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg])
+            .args(["-stests/test_files/input.gro", &output_arg])
             .assert()
             .success();
 
@@ -446,7 +446,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.pqr", &output_arg, "-yz"])
+            .args(["-stests/test_files/input.pqr", &output_arg, "-yz"])
             .assert()
             .success();
 
@@ -463,7 +463,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.tpr", &output_arg])
+            .args(["-stests/test_files/input.tpr", &output_arg])
             .assert()
             .success();
 
@@ -480,7 +480,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.pdb", &output_arg])
+            .args(["-stests/test_files/input.pdb", &output_arg])
             .assert()
             .success();
 
@@ -497,7 +497,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.pqr", &output_arg])
+            .args(["-stests/test_files/input.pqr", &output_arg])
             .assert()
             .success();
 
@@ -515,7 +515,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -536,7 +536,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.pqr",
+                "-stests/test_files/input.pqr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -557,7 +557,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -578,7 +578,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_traj.gro",
             ])
@@ -599,7 +599,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_traj.gro",
             ])
@@ -620,7 +620,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_traj.gro",
+                "-stests/test_files/input_traj.gro",
                 &output_arg,
                 "-ftests/test_files/input_traj.gro",
             ])
@@ -641,7 +641,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
                 "--com",
@@ -663,7 +663,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
             ])
@@ -684,7 +684,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-xyz",
@@ -706,7 +706,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -727,7 +727,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.trr",
             ])
@@ -748,7 +748,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.trr",
                 "--com",
@@ -770,7 +770,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.trr",
             ])
@@ -791,7 +791,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-xy",
@@ -813,7 +813,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-xz",
@@ -835,7 +835,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-yz",
@@ -857,7 +857,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-x",
@@ -879,7 +879,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-y",
@@ -901,7 +901,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-z",
@@ -923,7 +923,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-rW",
@@ -946,14 +946,14 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
                 "--com",
                 "-yz",
                 "-b10",
                 "-e80",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -972,14 +972,14 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.pqr",
+                "-stests/test_files/input_aa_peptide.pqr",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
                 "--com",
                 "-yz",
                 "-b10",
                 "-e80",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -998,14 +998,14 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.trr",
                 "--com",
                 "-x",
                 "-b10",
                 "-e80",
-                "-s2",
+                "-t2",
             ])
             .assert()
             .success();
@@ -1024,7 +1024,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-r(resname ASN and serial 35 to 45 and name BB)",
@@ -1046,7 +1046,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index.ndx",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
@@ -1069,7 +1069,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-b400",
@@ -1091,7 +1091,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-e700",
@@ -1113,10 +1113,10 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1135,10 +1135,10 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_traj.gro",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1157,7 +1157,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-b400",
@@ -1180,11 +1180,11 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-b400",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1203,11 +1203,11 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-e800",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1226,12 +1226,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1250,7 +1250,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -1273,7 +1273,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -1297,7 +1297,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -1321,7 +1321,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -1346,12 +1346,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
                 "-ftests/test_files/input_part3.xtc",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1370,12 +1370,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
                 "-ftests/test_files/input_part3.xtc",
-                "-s3",
+                "-t3",
                 "-b400",
                 "-e800",
             ])
@@ -1396,7 +1396,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -1420,7 +1420,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.trr",
                 "-b400",
@@ -1443,12 +1443,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.trr",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
             ])
             .assert()
             .success();
@@ -1467,7 +1467,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -1490,7 +1490,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.trr",
                 "-ftests/test_files/input_part2.trr",
@@ -1513,7 +1513,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.trr",
                 "-ftests/test_files/input_part2.trr",
@@ -1536,7 +1536,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.trr",
                 "-ftests/test_files/input_part2.trr",
@@ -1561,7 +1561,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part2.xtc",
                 "-ftests/test_files/input_part1.xtc",
@@ -1586,7 +1586,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg])
+            .args(["-stests/test_files/input.gro", &output_arg])
             .assert()
             .success();
 
@@ -1620,7 +1620,7 @@ mod pass_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "--overwrite"])
+            .args(["-stests/test_files/input.gro", &output_arg, "--overwrite"])
             .assert()
             .success();
 
@@ -1645,7 +1645,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "--silent",
@@ -1668,7 +1668,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index_with_reference.ndx",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
@@ -1691,7 +1691,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index_with_reference.ndx",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
@@ -1714,7 +1714,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-relement name carbon nitrogen hydrogen oxygen",
             ])
@@ -1735,7 +1735,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-relname carbon nitrogen hydrogen oxygen",
             ])
@@ -1756,7 +1756,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "-relsymbol C N H O",
             ])
@@ -1777,7 +1777,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "--xref=elname carbon nitrogen hydrogen oxygen",
                 "--yref=elsymbol C N H O",
@@ -1800,7 +1800,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.tpr",
+                "-stests/test_files/input_aa_peptide.tpr",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
             ])
@@ -1821,7 +1821,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -1842,7 +1842,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.tpr",
+                "-stests/test_files/input_aa_peptide.tpr",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
                 "--com",
@@ -1864,7 +1864,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.trr",
                 "--com",
@@ -1887,12 +1887,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.tpr",
+                "-stests/test_files/input_aa_peptide.tpr",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
                 "-b10",
                 "-e80",
-                "-s4",
+                "-t4",
                 "-xy",
             ])
             .assert()
@@ -1912,12 +1912,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
                 "-xyz",
             ])
             .assert()
@@ -1937,12 +1937,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.tpr",
+                "-stests/test_files/input_aa_peptide.tpr",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.trr",
                 "-b10",
                 "-e80",
-                "-s2",
+                "-t2",
                 "-z",
                 "--com",
             ])
@@ -1963,12 +1963,12 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.trr",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
                 "-xz",
                 "--com",
             ])
@@ -1989,7 +1989,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
@@ -2012,7 +2012,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input_part1.trr",
                 "-ftests/test_files/input_part2.trr",
@@ -2037,14 +2037,14 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.xtc",
                 "-ftests/test_files/input_part3.xtc",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
                 "-xyz",
             ])
             .assert()
@@ -2064,14 +2064,14 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input_part1.trr",
                 "-ftests/test_files/input_part2.trr",
                 "-ftests/test_files/input_part3.trr",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
                 "-xz",
                 "--com",
             ])
@@ -2092,7 +2092,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-rmolwith serial 3",
@@ -2114,7 +2114,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.tpr",
+                "-stests/test_files/input_aa_peptide.tpr",
                 &output_arg,
                 "-ftests/test_files/input_aa_peptide.xtc",
                 "-relement name carbon nitrogen hydrogen oxygen",
@@ -2136,7 +2136,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "--whole",
@@ -2158,7 +2158,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.trr",
                 "--whole",
@@ -2181,7 +2181,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-ntests/test_files/index.ndx",
@@ -2189,7 +2189,7 @@ mod pass_tests {
                 "--whole",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
                 "--com",
             ])
             .assert()
@@ -2209,7 +2209,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_nonorthogonal.gro",
+                "-stests/test_files/input_nonorthogonal.gro",
                 "-ftests/test_files/input.xtc",
                 &output_arg,
             ])
@@ -2231,7 +2231,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_invalid_box.gro",
+                "-stests/test_files/input_invalid_box.gro",
                 "-ftests/test_files/input.xtc",
                 &output_arg,
             ])
@@ -2253,7 +2253,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_no_box.pdb",
+                "-stests/test_files/input_no_box.pdb",
                 "-ftests/test_files/input.xtc",
                 &output_arg,
             ])
@@ -2275,7 +2275,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--xref=Protein",
                 "--yref=@membrane",
                 "--zref=@water",
@@ -2298,7 +2298,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--xref=Protein",
                 "--yref=resid 1 to 21",
                 "--zref=@water",
@@ -2321,7 +2321,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index.ndx",
                 "--xref=Protein",
                 "--yref=resid 1 to 21",
@@ -2345,7 +2345,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.pdb",
+                "-stests/test_files/input.pdb",
                 "--xref=Protein",
                 "--yref=@membrane",
                 "--zref=@water",
@@ -2368,7 +2368,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 "-ftests/test_files/input.xtc",
                 "--xref=Protein",
                 "--yref=@membrane",
@@ -2392,7 +2392,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index.ndx",
                 "-ftests/test_files/input.xtc",
                 "--xref=Protein",
@@ -2417,7 +2417,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.pdb",
+                "-stests/test_files/input.pdb",
                 "-ftests/test_files/input.trr",
                 "--xref=Protein",
                 "--yref=@membrane",
@@ -2441,7 +2441,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--xref=Protein",
                 "--yref=@membrane",
                 &output_arg,
@@ -2463,7 +2463,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--xref=Protein",
                 "--zref=resname W",
                 "-y",
@@ -2486,7 +2486,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--yref=Membrane",
                 "-ntests/test_files/index.ndx",
                 "-xyz",
@@ -2509,7 +2509,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index.ndx",
                 "--xref=Protein",
                 "--yref=@protein",
@@ -2534,7 +2534,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ntests/test_files/index.ndx",
                 "--xref=serial <= 42",
                 &output_arg,
@@ -2556,7 +2556,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-ntests/test_files/index.ndx",
@@ -2567,7 +2567,7 @@ mod pass_tests {
                 "--whole",
                 "-b400",
                 "-e800",
-                "-s3",
+                "-t3",
                 "--com",
             ])
             .assert()
@@ -2587,7 +2587,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/large_aa.tpr",
+                "-stests/test_files/large_aa.tpr",
                 "-rresname SOL",
                 "--whole",
                 &output_arg,
@@ -2609,7 +2609,7 @@ mod pass_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/large_aa.tpr",
+                "-stests/test_files/large_aa.tpr",
                 "-ftests/test_files/large_aa.xtc",
                 "-rresname POPC",
                 "--whole",
@@ -2641,7 +2641,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/tmp_input.gro",
+                "-stests/test_files/tmp_input.gro",
                 "-otests/test_files/tmp_input.gro",
             ])
             .assert()
@@ -2661,7 +2661,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ftests/test_files/tmp_input.xtc",
                 "-otests/test_files/tmp_input.xtc",
             ])
@@ -2682,7 +2682,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-ftests/test_files/input.xtc",
                 "-ftests/test_files/tmp_input2.xtc",
                 "-otests/test_files/tmp_input2.xtc",
@@ -2701,7 +2701,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-rNonexistent",
@@ -2719,7 +2719,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-r(resname LYS and name PO4)",
@@ -2737,7 +2737,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_nonexistent.gro",
+                "-stests/test_files/input_nonexistent.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-ntests/test_files/index.ndx",
@@ -2754,7 +2754,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_nonexistent.xtc",
                 "-ntests/test_files/index.ndx",
@@ -2771,7 +2771,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-ntests/test_files/index_nonexistent.ndx",
@@ -2788,7 +2788,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_tiny.gro",
+                "-stests/test_files/input_tiny.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -2803,7 +2803,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_nonorthogonal.gro", &output_arg])
+            .args(["-stests/test_files/input_nonorthogonal.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2815,7 +2815,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_invalid_box.gro", &output_arg])
+            .args(["-stests/test_files/input_invalid_box.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2827,7 +2827,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input_no_box.pdb", &output_arg])
+            .args(["-stests/test_files/input_no_box.pdb", &output_arg])
             .assert()
             .failure();
     }
@@ -2839,7 +2839,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg])
+            .args(["-stests/test_files/input.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2851,7 +2851,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg])
+            .args(["-stests/test_files/input.gro", &output_arg])
             .assert()
             .failure();
     }
@@ -2864,7 +2864,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
             ])
@@ -2879,7 +2879,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-b400"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-b400"])
             .assert()
             .failure();
     }
@@ -2891,7 +2891,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-e700"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-e700"])
             .assert()
             .failure();
     }
@@ -2903,7 +2903,7 @@ mod fail_tests {
 
         Command::cargo_bin("gcenter")
             .unwrap()
-            .args(["-ctests/test_files/input.gro", &output_arg, "-s3"])
+            .args(["-stests/test_files/input.gro", &output_arg, "-s3"])
             .assert()
             .failure();
     }
@@ -2916,7 +2916,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part1.xtc",
@@ -2933,7 +2933,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--com",
                 "-r@membrane",
                 &output_arg,
@@ -2950,7 +2950,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "-rmolecule with serial 17",
                 &output_arg,
             ])
@@ -2966,7 +2966,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--xref=molecule with serial 17",
                 &output_arg,
             ])
@@ -2982,7 +2982,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--yref=molecule with serial 17",
                 &output_arg,
             ])
@@ -2998,7 +2998,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 "--zref=molecule with serial 17",
                 &output_arg,
             ])
@@ -3014,7 +3014,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input_aa_peptide.gro",
+                "-stests/test_files/input_aa_peptide.gro",
                 &output_arg,
                 "--whole",
             ])
@@ -3030,7 +3030,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input_part1.xtc",
                 "-ftests/test_files/input_part2.trr",
@@ -3048,7 +3048,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.tpr",
+                "-stests/test_files/input.tpr",
                 &output_arg,
                 "-ftests/test_files/input.xtc",
                 "-relement name carbon",
@@ -3065,7 +3065,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/output_z.gro",
                 "-ftests/test_files/output_yz.gro",
@@ -3083,7 +3083,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.gro",
                 "-b100",
@@ -3100,7 +3100,7 @@ mod fail_tests {
         Command::cargo_bin("gcenter")
             .unwrap()
             .args([
-                "-ctests/test_files/input.gro",
+                "-stests/test_files/input.gro",
                 &output_arg,
                 "-ftests/test_files/input.gro",
                 "-e1000",

@@ -180,7 +180,7 @@ mod test {
 
     #[test]
     fn create_references_main() {
-        let command_line = ["gcenter", "-c=tests/test_files/input.gro", "-o=output.gro"];
+        let command_line = ["gcenter", "-s=tests/test_files/input.gro", "-o=output.gro"];
         let args = Args::parse_from(command_line);
 
         let mut system = System::from_file("tests/test_files/input.gro").unwrap();
@@ -202,7 +202,7 @@ mod test {
     fn create_references_main_xy() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "-o=output.gro",
             "-r=@protein",
             "-xy",
@@ -228,7 +228,7 @@ mod test {
     fn create_references_yzmain_xref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "-o=output.gro",
         ];
@@ -255,7 +255,7 @@ mod test {
     fn create_references_yzmain_xref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=resid 1-21",
             "-o=output.gro",
         ];
@@ -280,7 +280,7 @@ mod test {
     fn create_references_ymain_xref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "-o=output.gro",
             "-y",
@@ -308,7 +308,7 @@ mod test {
     fn create_references_ymain_xref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@protein",
             "-o=output.gro",
             "-y",
@@ -334,7 +334,7 @@ mod test {
     fn create_references_zmain_xref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "-o=output.gro",
             "-z",
@@ -362,7 +362,7 @@ mod test {
     fn create_references_xzmain_yref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "-r=@protein",
             "--yref=@membrane",
             "-o=output.gro",
@@ -390,7 +390,7 @@ mod test {
     fn create_references_xzmain_yref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "-r=@protein",
             "--yref=Protein",
             "-o=output.gro",
@@ -416,7 +416,7 @@ mod test {
     fn create_references_xmain_yref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "-r=@protein",
             "--yref=@membrane",
             "-o=output.gro",
@@ -445,7 +445,7 @@ mod test {
     fn create_references_xymain_zref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--zref=serial 1 to 43",
             "-o=output.gro",
         ];
@@ -472,7 +472,7 @@ mod test {
     fn create_references_xymain_zref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--zref=serial 1 to 42",
             "-o=output.gro",
         ];
@@ -497,7 +497,7 @@ mod test {
     fn create_references_ymain_zref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--zref=serial 1 to 43",
             "-o=output.gro",
             "-y",
@@ -525,7 +525,7 @@ mod test {
     fn create_references_ymain_zref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--zref=serial 1 to 42",
             "-o=output.gro",
             "-y",
@@ -551,7 +551,7 @@ mod test {
     fn create_references_zmain_xyref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--yref=@membrane or Protein",
             "-o=output.gro",
@@ -581,7 +581,7 @@ mod test {
     fn create_references_zmain_xyref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--yref=Membrane",
             "-o=output.gro",
@@ -609,7 +609,7 @@ mod test {
     fn create_references_zmain_xyref_all_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--yref=Membrane",
             "-r=Membrane",
@@ -636,7 +636,7 @@ mod test {
     fn create_references_ymain_xzref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--zref=@water",
             "-o=output.gro",
@@ -666,7 +666,7 @@ mod test {
     fn create_references_ymain_xzref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--zref=resname POPC",
             "-o=output.gro",
@@ -694,7 +694,7 @@ mod test {
     fn create_references_ymain_xzref_all_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=Protein",
             "--zref=@protein",
             "-o=output.gro",
@@ -720,7 +720,7 @@ mod test {
     fn create_references_xmain_yzref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--yref=@membrane",
             "--zref=@water",
             "--reference=Protein",
@@ -751,7 +751,7 @@ mod test {
     fn create_references_xmain_yzref_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--yref=@membrane",
             "--zref=@membrane",
             "--reference=Protein",
@@ -780,7 +780,7 @@ mod test {
     fn create_references_xmain_yzref_all_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--yref=@protein",
             "--zref=resid 1 to 21",
             "--reference=Protein",
@@ -807,7 +807,7 @@ mod test {
     fn create_references_xyzref() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--yref=@water",
             "--zref=@ion",
@@ -838,7 +838,7 @@ mod test {
     fn create_references_xyzref_all_same() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=Membrane",
             "--yref=@membrane",
             "--zref=resname POPC",
@@ -865,7 +865,7 @@ mod test {
     fn create_references_xyref_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--yref=@water",
             "-o=output.gro",
@@ -893,7 +893,7 @@ mod test {
     fn create_references_xzref_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "--zref=@water",
             "-o=output.gro",
@@ -921,7 +921,7 @@ mod test {
     fn create_references_xzref_same_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@protein",
             "--zref=Protein",
             "-o=output.gro",
@@ -947,7 +947,7 @@ mod test {
     fn create_references_yzref_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--yref=@membrane",
             "--zref=@water",
             "-o=output.gro",
@@ -975,7 +975,7 @@ mod test {
     fn create_references_xref_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--xref=@membrane",
             "-o=output.gro",
         ];
@@ -1000,7 +1000,7 @@ mod test {
     fn create_references_yref_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--yref=@membrane",
             "-o=output.gro",
         ];
@@ -1025,7 +1025,7 @@ mod test {
     fn create_references_zref_nomain() {
         let command_line = [
             "gcenter",
-            "-c=tests/test_files/input.gro",
+            "-s=tests/test_files/input.gro",
             "--zref=@membrane",
             "-o=output.gro",
         ];

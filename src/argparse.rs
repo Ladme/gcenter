@@ -22,7 +22,7 @@ Be aware that `gcenter` exclusively supports orthogonal simulation boxes."
 )]
 pub struct Args {
     #[arg(
-        short = 'c',
+        short = 's',
         long = "structure",
         help = "Input structure file",
         long_help = "Path to a gro, pdb, pqr, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.",
@@ -94,7 +94,7 @@ This option cannot be used when the trajectory is a gro file since gro files are
     pub end_time: Option<f32>,
 
     #[arg(
-        short = 's',
+        short = 't',
         long = "step",
         help = "Write every <STEP>th frame",
         default_value_t = 1,
