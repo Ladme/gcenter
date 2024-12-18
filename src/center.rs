@@ -158,15 +158,15 @@ fn center_trajectories(
     if args.trajectories.len() == 1 {
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
-                let reader = read_range_step(system.xtc_iter(&args.trajectories[0])?, &args)?;
+                let reader = read_range_step(system.xtc_iter(&args.trajectories[0])?, args)?;
                 center_trajectory(reader, args, operations)
             }
             FileType::TRR => {
-                let reader = read_range_step(system.trr_iter(&args.trajectories[0])?, &args)?;
+                let reader = read_range_step(system.trr_iter(&args.trajectories[0])?, args)?;
                 center_trajectory(reader, args, operations)
             }
             FileType::GRO => {
-                let reader = read_step(system.gro_iter(&args.trajectories[0])?, &args)?;
+                let reader = read_step(system.gro_iter(&args.trajectories[0])?, args)?;
                 center_trajectory(reader, args, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
@@ -174,11 +174,11 @@ fn center_trajectories(
     } else {
         match FileType::from_name(&args.trajectories[0]) {
             FileType::XTC => {
-                let reader = read_range_step(system.xtc_cat_iter(&args.trajectories)?, &args)?;
+                let reader = read_range_step(system.xtc_cat_iter(&args.trajectories)?, args)?;
                 center_trajectory(reader, args, operations)
             },
             FileType::TRR => {
-                let reader = read_range_step(system.trr_cat_iter(&args.trajectories)?, &args)?;
+                let reader = read_range_step(system.trr_cat_iter(&args.trajectories)?, args)?;
                 center_trajectory(reader, args, operations)
             }
             _ => panic!("\ngcenter: Fatal Error. Input file has unsupported file extension but this should have been handled before."),
