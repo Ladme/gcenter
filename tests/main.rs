@@ -2323,6 +2323,51 @@ mod pass_tests {
             output.path().to_str().unwrap()
         ));
     }
+
+    #[test]
+    fn tpr_whole_atomistic() {
+        let output = Builder::new().suffix(".gro").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/large_aa.tpr",
+                "-rresname SOL",
+                "--whole",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/large_aa_whole_expected.gro",
+            output.path().to_str().unwrap()
+        ))
+    }
+
+    #[test]
+    fn xtc_whole_atomistic() {
+        let output = Builder::new().suffix(".xtc").tempfile().unwrap();
+        let output_arg = format!("-o{}", output.path().display());
+
+        Command::cargo_bin("gcenter")
+            .unwrap()
+            .args([
+                "-ctests/test_files/large_aa.tpr",
+                "-ftests/test_files/large_aa.xtc",
+                "-rresname POPC",
+                "--whole",
+                &output_arg,
+            ])
+            .assert()
+            .success();
+
+        assert!(file_diff::diff(
+            "tests/test_files/large_aa_whole_expected.xtc",
+            output.path().to_str().unwrap()
+        ))
+    }
 }
 
 #[cfg(test)]
