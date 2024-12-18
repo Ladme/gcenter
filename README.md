@@ -23,7 +23,7 @@ gcenter -c system.gro -f trajectory.xtc -o output_trajectory.xtc
 Usage: gcenter [OPTIONS] --structure <STRUCTURE> --output <OUTPUT>
 
 Options:
-  -c, --structure <STRUCTURE>
+  -s, --structure <STRUCTURE>
           Path to a gro, pdb, pqr, or tpr file containing the system structure. If a trajectory is also provided, the coordinates from the structure file are ignored.
 
   -f, --trajectory [<TRAJECTORIES>...]
@@ -62,7 +62,7 @@ Options:
           
           [default: NaN]
 
-  -s, --step <STEP>
+  -t, --step <STEP>
           Center and write only every <STEP>th frame of the trajectory to the output file.
           This option is only applicable when trajectory file(s) is/are provided.
           
