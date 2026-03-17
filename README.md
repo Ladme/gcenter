@@ -14,7 +14,7 @@ Center your chosen group within a Gromacs trajectory or structure file effortles
 ## Example usage
 
 ```
-gcenter -c system.gro -f trajectory.xtc -o output_trajectory.xtc
+gcenter -s system.gro -f trajectory.xtc -o output_trajectory.xtc
 ```
 
 ## Options
